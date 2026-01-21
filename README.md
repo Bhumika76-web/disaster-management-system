@@ -19,28 +19,44 @@ A comprehensive disaster management system built with Java Swing and MySQL that 
 - **IDE**: IntelliJ IDEA / Eclipse
 
 ## Project Structure
-src/
-├── ui/
-│   ├── LoginRegisterPanel.java
-│   ├── AdminDashboard.java
-│   ├── CitizenDashboard.java
-│   ├── ResponderDashboard.java
-│   ├── RescueOperationsPage.java
-│   ├── RiskAssessmentPage.java
-│   └── AlertsPage.java
-├── models/
-│   ├── User.java
-│   ├── Disaster.java
-│   ├── DisasterReport.java
-│   ├── HelpRequest.java
-│   ├── ResponderTask.java
-│   └── NotificationAcknowledgment.java
-├── dao/
-│   ├── UserDAO.java
-│   ├── DisasterDAO.java
-│   ├── DisasterReportDAO.java
-│   ├── HelpRequestDAO.java
-│   ├── ResponderTaskDAO.java
-│   └── NotificationAcknowledgmentDAO.java
-└── database/
-└── DatabaseConnection.java
+DisasterManagementSystem/
+├── src/
+│   ├── config/
+│   │   └── AppConstants.java 
+│   ├── database/
+│   │   └── DatabaseConnection.java 
+│   ├── dao/
+│   │   ├── UserDAO.java 
+│   │   ├── DisasterDAO.java
+│   │   ├── HelpRequestDAO.java 
+│   │   ├── DisasterReportDAO.java
+│   │   ├── ResponderTaskDAO.java 
+│   │   └── NotificationAcknowledgmentDAO.java 
+│   ├── models/
+│   │    ├── User.java
+│   │    ├── Disaster.java
+│   │    ├── DisasterReport.java
+│   │    ├── HelpRequest.java
+│   │    ├── ResponderTask.java
+│   │     └── NotificationAcknowledgment.java
+│   ├── ui/
+│   │   ├── components/
+│   │   │   └── ComponentFactory.java 
+│   │   ├── theme/
+│   │   │   └── AppTheme.java 
+│   │   ├── utils/
+│   │   │   └── UIUtils.java 
+│   │   ├── AdminDashboard.java 
+│   │   ├── CitizenDashboard.java 
+│   │   ├── ResponderDashboard.java
+│   │   ├── AlertsPage.java 
+│   │   ├── RescueOperationsPage.java 
+│   │   ├── RiskAssessmentPage.java 
+│   │   ├── AdminHelpRequestManagement.java 
+│   │   ├── SimpleMapPanel.java 
+│   │   ├── LoginRegisterPanel.java 
+│   │   └── MainFrame.java 
+│   └── util/
+│       ├── Logger.java 
+│       ├── ValidationUtils.java
+│       └── ValidationResult.java
