@@ -10,40 +10,48 @@ import models.DisasterReport;
 import models.NotificationAcknowledgment;
 import dao.DisasterReportDAO;
 import dao.NotificationAcknowledgmentDAO;
-import dao.DisasterDAO;
+import ui.components.ComponentFactory;
+import ui.theme.AppTheme;
+import ui.utils.UIUtils;
+import util.Logger;
+import config.AppConstants;
+
 
 public class RiskAssessmentPage extends JPanel {
+
+    private static final String CLASS_NAME = "RiskAssessmentPage";
+
     private User user;
     private MainFrame mainFrame;
-    private DisasterReportDAO disasterReportDAO = new DisasterReportDAO();
-    private NotificationAcknowledgmentDAO notificationDAO = new NotificationAcknowledgmentDAO();
-    private DisasterDAO disasterDAO = new DisasterDAO();
+    private DisasterReportDAO disasterReportDAO;
+    private NotificationAcknowledgmentDAO notificationDAO;
     private boolean isAdmin;
     private JPanel notificationsPanel;
 
     public RiskAssessmentPage(User user, MainFrame mainFrame) {
         this.user = user;
         this.mainFrame = mainFrame;
-        this.isAdmin = "admin".equals(user.getUserType());
+        this.disasterReportDAO = new DisasterReportDAO();
+        this.notificationDAO = new NotificationAcknowledgmentDAO();
+        this.isAdmin = AppConstants.USER_TYPE_ADMIN.equals(user.getUserType());
 
         setLayout(null);
-        setBackground(new Color(20, 25, 47));
+        setBackground(AppTheme.BG_DARK);
 
+        Logger.info(CLASS_NAME, "Initializing RiskAssessmentPage");
         initUI();
     }
+
 
     private void initUI() {
         int yPos = 15;
 
-        JButton backBtn = createIconButton("←", new Color(80, 100, 140));
+        JButton backBtn = ComponentFactory.createPrimaryButton("↶", () -> mainFrame.showDashboard(user));
         backBtn.setBounds(20, yPos, 35, 35);
-        backBtn.addActionListener(e -> mainFrame.showDashboard(user));
 
-        JLabel headerLabel = new JLabel("Risk Assessment & Notifications");
-        headerLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        headerLabel.setForeground(Color.WHITE);
+        JLabel headerLabel = ComponentFactory.createTitleLabel(
+                "🔍 Risk Assessment & Notifications", AppTheme.TEXT_WHITE);
         headerLabel.setBounds(70, yPos, 800, 35);
-
         yPos += 50;
 
         if (isAdmin) {
@@ -59,23 +67,18 @@ public class RiskAssessmentPage extends JPanel {
         yPos += 240;
 
         if (!isAdmin) {
-            JLabel myNotifTitle = new JLabel("🔔 My Notifications");
-            myNotifTitle.setFont(new Font("Arial", Font.BOLD, 16));
-            myNotifTitle.setForeground(new Color(100, 200, 255));
+            JLabel myNotifTitle = ComponentFactory.createHeaderLabel(
+                    "🔔 My Notifications", AppTheme.COLOR_BLUE);
             myNotifTitle.setBounds(20, yPos, 300, 25);
-
             yPos += 30;
 
             notificationsPanel = new JPanel();
             notificationsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
-            notificationsPanel.setBackground(new Color(20, 25, 47));
+            notificationsPanel.setBackground(AppTheme.BG_DARK);
             notificationsPanel.setOpaque(false);
 
-            JScrollPane scroll = new JScrollPane(notificationsPanel);
+            JScrollPane scroll = UIUtils.createThemedScrollPane(notificationsPanel);
             scroll.setBounds(20, yPos, 860, 200);
-            scroll.setBackground(new Color(20, 25, 47));
-            scroll.setBorder(BorderFactory.createLineBorder(new Color(100, 150, 255), 1));
-            scroll.getVerticalScrollBar().setUnitIncrement(15);
 
             loadMyNotifications();
             add(scroll);
@@ -85,14 +88,15 @@ public class RiskAssessmentPage extends JPanel {
         add(headerLabel);
     }
 
+
     private JPanel createHighRiskPanel() {
         JPanel panel = new JPanel(null) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g;
-                g2d.setColor(new Color(40, 60, 100));
+                g2d.setColor(AppTheme.BG_LIGHT);
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-                g2d.setColor(new Color(100, 150, 255));
+                g2d.setColor(AppTheme.BORDER_LIGHT);
                 g2d.setStroke(new BasicStroke(1.5f));
                 g2d.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 10, 10);
             }
@@ -101,19 +105,18 @@ public class RiskAssessmentPage extends JPanel {
 
         List<DisasterReport> highRiskAreas = disasterReportDAO.getHighRiskAreas();
 
-        JLabel titleLabel = new JLabel("High-Risk Areas");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        titleLabel.setForeground(new Color(255, 150, 100));
+        JLabel titleLabel = ComponentFactory.createHeaderLabel(
+                "High-Risk Areas", AppTheme.COLOR_ORANGE);
         titleLabel.setBounds(20, 15, 200, 25);
 
         JLabel countLabel = new JLabel(String.valueOf(highRiskAreas.size()));
-        countLabel.setFont(new Font("Arial", Font.BOLD, 32));
-        countLabel.setForeground(new Color(255, 150, 100));
+        countLabel.setFont(AppTheme.FONT_TITLE);
+        countLabel.setForeground(AppTheme.COLOR_ORANGE);
         countLabel.setBounds(30, 45, 100, 40);
 
         JLabel areasLabel = new JLabel("Areas +" + Math.max(0, highRiskAreas.size() - 1));
-        areasLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        areasLabel.setForeground(new Color(150, 200, 255));
+        areasLabel.setFont(AppTheme.FONT_REGULAR);
+        areasLabel.setForeground(AppTheme.TEXT_SECONDARY);
         areasLabel.setBounds(30, 90, 100, 20);
 
         JPanel chartPanel = new JPanel() {
@@ -128,24 +131,22 @@ public class RiskAssessmentPage extends JPanel {
                 Map<String, Integer> areaRisk = new HashMap<>();
                 for (DisasterReport report : highRiskAreas) {
                     areaRisk.put(report.getLocation(),
-                            Math.max(areaRisk.getOrDefault(report.getLocation(), 0), report.getEstimatedSeverity()));
+                            Math.max(areaRisk.getOrDefault(report.getLocation(), 0),
+                                    report.getEstimatedSeverity()));
                 }
 
                 int index = 0;
                 for (String area : areaRisk.keySet()) {
                     if (index >= 3) break;
-
                     int severity = areaRisk.get(area);
                     int barHeight = (int) ((severity / 10.0) * maxHeight);
-
-                    g2d.setColor(new Color(100, 150, 100));
-                    g2d.fillRect(chartX + (index * 100), chartY + maxHeight - barHeight, barWidth, barHeight);
-
-                    g2d.setColor(Color.WHITE);
-                    g2d.setFont(new Font("Arial", Font.PLAIN, 10));
+                    g2d.setColor(AppTheme.COLOR_GREEN);
+                    g2d.fillRect(chartX + (index * 100), chartY + maxHeight - barHeight,
+                            barWidth, barHeight);
+                    g2d.setColor(AppTheme.TEXT_WHITE);
+                    g2d.setFont(AppTheme.FONT_SMALL);
                     String areaName = area.length() > 8 ? area.substring(0, 8) : area;
                     g2d.drawString(areaName, chartX + (index * 100) - 5, chartY + maxHeight + 15);
-
                     index++;
                 }
             }
@@ -160,35 +161,34 @@ public class RiskAssessmentPage extends JPanel {
         return panel;
     }
 
+
     private JPanel createNotificationPanel() {
         JPanel panel = new JPanel(null) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g;
-                g2d.setColor(new Color(40, 60, 100));
+                g2d.setColor(AppTheme.BG_LIGHT);
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-                g2d.setColor(new Color(100, 150, 255));
+                g2d.setColor(AppTheme.BORDER_LIGHT);
                 g2d.setStroke(new BasicStroke(1.5f));
                 g2d.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 10, 10);
             }
         };
         panel.setOpaque(false);
 
-        JLabel titleLabel = new JLabel("Notification Insights");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        titleLabel.setForeground(new Color(255, 150, 100));
+        JLabel titleLabel = ComponentFactory.createHeaderLabel(
+                "📊 Notification Insights", AppTheme.COLOR_ORANGE);
         titleLabel.setBounds(20, 15, 250, 25);
 
         double percentage = notificationDAO.getAcknowledgmentPercentage();
-
         JLabel percentLabel = new JLabel(String.format("%.0f%%", percentage));
-        percentLabel.setFont(new Font("Arial", Font.BOLD, 32));
-        percentLabel.setForeground(new Color(100, 255, 150));
+        percentLabel.setFont(AppTheme.FONT_TITLE);
+        percentLabel.setForeground(AppTheme.COLOR_GREEN);
         percentLabel.setBounds(30, 45, 100, 40);
 
-        JLabel engageLabel = new JLabel("Engagement -10%");
-        engageLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        engageLabel.setForeground(new Color(255, 100, 100));
+        JLabel engageLabel = new JLabel("Engagement Rate");
+        engageLabel.setFont(AppTheme.FONT_REGULAR);
+        engageLabel.setForeground(AppTheme.COLOR_RED);
         engageLabel.setBounds(30, 90, 150, 20);
 
         JPanel chartPanel = new JPanel() {
@@ -206,21 +206,17 @@ public class RiskAssessmentPage extends JPanel {
 
                 if (total > 0) {
                     int acknowledgedWidth = (int) ((acknowledged * 1.0 / total) * chartWidth);
-                    g2d.setColor(new Color(100, 150, 100));
+                    g2d.setColor(AppTheme.COLOR_GREEN);
                     g2d.fillRect(chartX, chartY, acknowledgedWidth, 30);
-                    g2d.setColor(Color.WHITE);
-                    g2d.setFont(new Font("Arial", Font.PLAIN, 11));
+                    g2d.setColor(AppTheme.TEXT_WHITE);
+                    g2d.setFont(AppTheme.FONT_SMALL);
                     g2d.drawString("Acknowledged (" + acknowledged + ")", chartX + 5, chartY + 48);
 
                     int ignoredWidth = (int) ((ignored * 1.0 / total) * chartWidth);
-                    g2d.setColor(new Color(150, 100, 100));
+                    g2d.setColor(AppTheme.COLOR_RED);
                     g2d.fillRect(chartX, chartY + 50, ignoredWidth, 30);
-                    g2d.setColor(Color.WHITE);
+                    g2d.setColor(AppTheme.TEXT_WHITE);
                     g2d.drawString("Ignored (" + ignored + ")", chartX + 5, chartY + 98);
-                } else {
-                    g2d.setColor(Color.WHITE);
-                    g2d.setFont(new Font("Arial", Font.PLAIN, 12));
-                    g2d.drawString("No notification data yet", chartX + 5, chartY + 40);
                 }
             }
         };
@@ -234,15 +230,17 @@ public class RiskAssessmentPage extends JPanel {
         return panel;
     }
 
+
     private void loadMyNotifications() {
+        Logger.debug(CLASS_NAME, "Loading notifications for user: " + user.getId());
         notificationsPanel.removeAll();
 
         List<DisasterReport> reports = disasterReportDAO.getAllReports();
 
         if (reports.isEmpty()) {
             JLabel noNotifLabel = new JLabel("✅ No recent disaster reports");
-            noNotifLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-            noNotifLabel.setForeground(new Color(100, 200, 100));
+            noNotifLabel.setFont(AppTheme.FONT_REGULAR);
+            noNotifLabel.setForeground(AppTheme.COLOR_GREEN);
             notificationsPanel.add(noNotifLabel);
         } else {
             for (DisasterReport report : reports) {
@@ -256,12 +254,14 @@ public class RiskAssessmentPage extends JPanel {
         notificationsPanel.repaint();
     }
 
+
     private JPanel createNotificationCard(DisasterReport report) {
         JPanel card = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
 
                 Color bgColor = report.getEstimatedSeverity() >= 7 ?
                         new Color(100, 60, 60) : new Color(60, 80, 60);
@@ -269,7 +269,7 @@ public class RiskAssessmentPage extends JPanel {
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
 
                 Color borderColor = report.getEstimatedSeverity() >= 7 ?
-                        new Color(255, 100, 100) : new Color(100, 255, 150);
+                        AppTheme.COLOR_RED : AppTheme.COLOR_GREEN;
                 g2d.setColor(borderColor);
                 g2d.setStroke(new BasicStroke(1.5f));
                 g2d.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 10, 10);
@@ -279,56 +279,35 @@ public class RiskAssessmentPage extends JPanel {
         card.setOpaque(false);
 
         JLabel typeLabel = new JLabel(report.getDisasterType());
-        typeLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        typeLabel.setForeground(Color.WHITE);
+        typeLabel.setFont(AppTheme.FONT_LABEL);
+        typeLabel.setForeground(AppTheme.TEXT_WHITE);
         typeLabel.setBounds(15, 8, 200, 20);
 
         JLabel descLabel = new JLabel(report.getDescription());
-        descLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        descLabel.setFont(AppTheme.FONT_REGULAR);
         descLabel.setForeground(new Color(200, 200, 200));
         descLabel.setBounds(15, 32, 450, 18);
 
-        JLabel locationLabel = new JLabel("📍 " + report.getLocation() + " | Severity: " + report.getEstimatedSeverity());
-        locationLabel.setFont(new Font("Arial", Font.PLAIN, 10));
-        locationLabel.setForeground(new Color(150, 200, 255));
+        JLabel locationLabel = new JLabel("📍 " + report.getLocation() +
+                " | Severity: " + report.getEstimatedSeverity());
+        locationLabel.setFont(AppTheme.FONT_SMALL);
+        locationLabel.setForeground(AppTheme.TEXT_SECONDARY);
         locationLabel.setBounds(15, 54, 550, 15);
 
         JLabel timeLabel = new JLabel("Time: " + report.getTimestamp());
-        timeLabel.setFont(new Font("Arial", Font.PLAIN, 9));
+        timeLabel.setFont(AppTheme.FONT_SMALL);
         timeLabel.setForeground(new Color(180, 180, 180));
         timeLabel.setBounds(15, 72, 400, 12);
 
-        JButton acknowledgeBtn = createStyledButton("✅ ACKNOWLEDGE", new Color(100, 200, 100));
+        JButton acknowledgeBtn = ComponentFactory.createSuccessButton(
+                "✅ ACKNOWLEDGE", () -> handleAcknowledge(report));
         acknowledgeBtn.setBounds(620, 25, 95, 35);
-        acknowledgeBtn.setFont(new Font("Arial", Font.BOLD, 9));
-        acknowledgeBtn.addActionListener(e -> {
-            NotificationAcknowledgment ack = new NotificationAcknowledgment(
-                    user.getId(), report.getId(), user.getUsername(),
-                    report.getDisasterType(), "acknowledged"
-            );
-            if (notificationDAO.recordNotification(ack)) {
-                JOptionPane.showMessageDialog(null,
-                        "✅ Thank you for acknowledging!\n\nGraph will update automatically.",
-                        "Acknowledged", JOptionPane.INFORMATION_MESSAGE);
-                loadMyNotifications();
-            }
-        });
+        acknowledgeBtn.setFont(AppTheme.FONT_SMALL);
 
-        JButton ignoreBtn = createStyledButton("❌ IGNORE", new Color(200, 100, 100));
+        JButton ignoreBtn = ComponentFactory.createDangerButton(
+                "❌ IGNORE", () -> handleIgnore(report));
         ignoreBtn.setBounds(725, 25, 85, 35);
-        ignoreBtn.setFont(new Font("Arial", Font.BOLD, 9));
-        ignoreBtn.addActionListener(e -> {
-            NotificationAcknowledgment ack = new NotificationAcknowledgment(
-                    user.getId(), report.getId(), user.getUsername(),
-                    report.getDisasterType(), "ignored"
-            );
-            if (notificationDAO.recordNotification(ack)) {
-                JOptionPane.showMessageDialog(null,
-                        "❌ Alert ignored!\n\nGraph will update automatically.",
-                        "Ignored", JOptionPane.INFORMATION_MESSAGE);
-                loadMyNotifications();
-            }
-        });
+        ignoreBtn.setFont(AppTheme.FONT_SMALL);
 
         card.add(typeLabel);
         card.add(descLabel);
@@ -340,42 +319,31 @@ public class RiskAssessmentPage extends JPanel {
         return card;
     }
 
-    private JButton createIconButton(String text, Color color) {
-        JButton btn = new JButton(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setColor(color);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
-                super.paintComponent(g);
-            }
-        };
-        btn.setFont(new Font("Arial", Font.BOLD, 18));
-        btn.setForeground(Color.WHITE);
-        btn.setContentAreaFilled(false);
-        btn.setBorderPainted(false);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return btn;
+
+    private void handleAcknowledge(DisasterReport report) {
+        Logger.debug(CLASS_NAME, "User acknowledged report: " + report.getId());
+        NotificationAcknowledgment ack = new NotificationAcknowledgment(
+                user.getId(), report.getId(), user.getUsername(),
+                report.getDisasterType(), "acknowledged"
+        );
+        if (notificationDAO.recordNotification(ack)) {
+            UIUtils.showInfo(this, "Acknowledged",
+                    "✅ Thank you for acknowledging!");
+            loadMyNotifications();
+        }
     }
 
-    private JButton createStyledButton(String text, Color color) {
-        JButton btn = new JButton(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setColor(color);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                super.paintComponent(g);
-            }
-        };
-        btn.setForeground(Color.WHITE);
-        btn.setContentAreaFilled(false);
-        btn.setBorderPainted(false);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return btn;
+
+    private void handleIgnore(DisasterReport report) {
+        Logger.debug(CLASS_NAME, "User ignored report: " + report.getId());
+        NotificationAcknowledgment ack = new NotificationAcknowledgment(
+                user.getId(), report.getId(), user.getUsername(),
+                report.getDisasterType(), "ignored"
+        );
+        if (notificationDAO.recordNotification(ack)) {
+            UIUtils.showInfo(this, "Ignored",
+                    "❌ Alert ignored!");
+            loadMyNotifications();
+        }
     }
 }

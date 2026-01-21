@@ -5,185 +5,221 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import models.DisasterReport;
-import dao.DisasterReportDAO;
-import models.User;
 import models.Disaster;
+import models.User;
+import dao.DisasterReportDAO;
 import dao.DisasterDAO;
+import ui.components.ComponentFactory;
+import ui.theme.AppTheme;
+import ui.utils.UIUtils;
+import util.Logger;
+
 
 public class CitizenDashboard extends JPanel {
+
+    private static final String CLASS_NAME = "CitizenDashboard";
+
     private User citizen;
     private MainFrame mainFrame;
-    private DisasterDAO disasterDAO = new DisasterDAO();
+    private DisasterDAO disasterDAO;
     private JPanel disasterCardsPanel;
     private JTextField searchField;
     private JButton searchBtn;
-    private List<Disaster> currentDisasters = new ArrayList<>();
+    private List<Disaster> currentDisasters;
     private JComboBox<String> typeFilterCombo;
     private JSlider severitySlider;
-    private JButton filterBtn;
     private SimpleMapPanel mapPanel;
 
     public CitizenDashboard(User citizen, MainFrame mainFrame) {
         this.citizen = citizen;
         this.mainFrame = mainFrame;
-        setLayout(null);
-        setBackground(new Color(20, 25, 47));
+        this.disasterDAO = new DisasterDAO();
+        this.currentDisasters = new ArrayList<>();
 
+        setLayout(null);
+        setBackground(AppTheme.BG_DARK);
+
+        Logger.info(CLASS_NAME, "Initializing CitizenDashboard for: " + citizen.getUsername());
         initUI();
         refreshAlerts();
     }
 
+
     private void initUI() {
+        final int PADDING = 20;
+        int yPos = PADDING;
 
-        JLabel headerLabel = new JLabel("🚨 CITIZEN ALERT CENTER");
-        headerLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        headerLabel.setForeground(new Color(255, 150, 100));
-        headerLabel.setBounds(20, 20, 800, 40);
 
-        JLabel userLabel = new JLabel("Hello, " + citizen.getUsername() + " from " + citizen.getLocation());
-        userLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        userLabel.setForeground(new Color(150, 200, 255));
-        userLabel.setBounds(20, 70, 600, 25);
+        JLabel headerLabel = ComponentFactory.createTitleLabel(
+                "🚨 CITIZEN ALERT CENTER", AppTheme.COLOR_ORANGE);
+        headerLabel.setBounds(PADDING, yPos, 800, 40);
+        yPos += 50;
+
+
+        JLabel userLabel = new JLabel(
+                "Hello, " + citizen.getUsername() + " from " + citizen.getLocation());
+        userLabel.setFont(AppTheme.FONT_LABEL);
+        userLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        userLabel.setBounds(PADDING, yPos, 600, 25);
+        yPos += 40;
+
 
         JLabel infoLabel = new JLabel("📍 Live Disaster Alerts near your location:");
-        infoLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        infoLabel.setForeground(Color.WHITE);
-        infoLabel.setBounds(20, 110, 600, 25);
+        infoLabel.setFont(AppTheme.FONT_LABEL);
+        infoLabel.setForeground(AppTheme.TEXT_WHITE);
+        infoLabel.setBounds(PADDING, yPos, 600, 25);
+        yPos += 35;
 
-        JPanel searchPanel = new JPanel();
-        searchPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
-        searchPanel.setBackground(new Color(20, 25, 47));
-        searchPanel.setBounds(20, 140, 800, 50);
 
-        JLabel searchLabel = new JLabel("🔍 Search Location:");
-        searchLabel.setForeground(Color.WHITE);
-        searchLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        JPanel searchPanel = createSearchPanel();
+        searchPanel.setBounds(PADDING, yPos, 860, 50);
+        yPos += 60;
 
-        searchField = new JTextField(20);
-        searchField.setFont(new Font("Arial", Font.PLAIN, 12));
-        searchField.setBackground(new Color(50, 60, 90));
-        searchField.setForeground(Color.WHITE);
-        searchField.setCaretColor(Color.WHITE);
 
-        searchBtn = createStyledButton("🔍 Search", new Color(100, 200, 255));
-        searchBtn.addActionListener(e -> performSearch());
+        JPanel filterPanel = createFilterPanel();
+        filterPanel.setBounds(PADDING, yPos, 860, 60);
+        yPos += 70;
 
-        searchPanel.add(searchLabel);
-        searchPanel.add(searchField);
-        searchPanel.add(searchBtn);
-
-        JPanel filterPanel = new JPanel();
-        filterPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
-        filterPanel.setBackground(new Color(20, 25, 47));
-        filterPanel.setBounds(20, 200, 800, 60);
-
-        JLabel filterLabel = new JLabel("Filter by:");
-        filterLabel.setForeground(Color.WHITE);
-        filterLabel.setFont(new Font("Arial", Font.BOLD, 12));
-
-        typeFilterCombo = new JComboBox<>(new String[]{
-                "All Types", "Flood", "Earthquake", "Fire",
-                "Cyclone", "Landslide", "Tsunami", "Tornado"
-        });
-        typeFilterCombo.setFont(new Font("Arial", Font.PLAIN, 11));
-        typeFilterCombo.setBackground(new Color(50, 60, 90));
-        typeFilterCombo.setForeground(Color.WHITE);
-        typeFilterCombo.addActionListener(e -> performFilter());
-
-        JLabel severityLabel = new JLabel("Min Severity:");
-        severityLabel.setForeground(Color.WHITE);
-        severityLabel.setFont(new Font("Arial", Font.BOLD, 11));
-
-        severitySlider = new JSlider(1, 10, 1);
-        severitySlider.setMajorTickSpacing(1);
-        severitySlider.setPaintTicks(true);
-        severitySlider.setPaintLabels(true);
-        severitySlider.setBackground(new Color(20, 25, 47));
-        severitySlider.setForeground(Color.WHITE);
-        severitySlider.setPreferredSize(new Dimension(150, 50));
-        severitySlider.addChangeListener(e -> performFilter());
-
-        filterBtn = createStyledButton("Apply Filter", new Color(150, 200, 100));
-        filterBtn.addActionListener(e -> performFilter());
-
-        filterPanel.add(filterLabel);
-        filterPanel.add(typeFilterCombo);
-        filterPanel.add(severityLabel);
-        filterPanel.add(severitySlider);
-        filterPanel.add(filterBtn);
 
         mapPanel = new SimpleMapPanel();
-        mapPanel.setBounds(20, 275, 860, 220);
+        mapPanel.setBounds(PADDING, yPos, 860, 220);
         List<Disaster> initialDisasters = disasterDAO.getActiveDisasters();
         mapPanel.displayDisastersOnMap(initialDisasters);
+        yPos += 230;
 
-        JLabel alertsLabel = new JLabel("📌 Active Alerts");
-        alertsLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        alertsLabel.setForeground(new Color(255, 150, 100));
-        alertsLabel.setBounds(20, 505, 200, 25);
+
+        JLabel alertsLabel = ComponentFactory.createHeaderLabel(
+                "📋 Active Alerts", AppTheme.COLOR_ORANGE);
+        alertsLabel.setBounds(PADDING, yPos, 200, 25);
+        yPos += 35;
 
         disasterCardsPanel = new JPanel();
         disasterCardsPanel.setLayout(new BoxLayout(disasterCardsPanel, BoxLayout.Y_AXIS));
-        disasterCardsPanel.setBackground(new Color(20, 25, 47));
+        disasterCardsPanel.setBackground(AppTheme.BG_DARK);
         disasterCardsPanel.setOpaque(false);
-        disasterCardsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JScrollPane scrollPane = new JScrollPane(disasterCardsPanel);
-        scrollPane.setBounds(20, 535, 860, 120);
-        scrollPane.setBackground(new Color(20, 25, 47));
-        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(100, 150, 255), 1));
-        scrollPane.getVerticalScrollBar().setUnitIncrement(20);
-        scrollPane.getVerticalScrollBar().setBackground(new Color(40, 50, 80));
+        JScrollPane scrollPane = UIUtils.createThemedScrollPane(disasterCardsPanel);
+        scrollPane.setBounds(PADDING, yPos, 860, 120);
+        yPos += 135;
 
-        JButton refreshBtn = createStyledButton("🔄 REFRESH", new Color(150, 255, 150));
-        refreshBtn.setBounds(20, 665, 120, 40);
-        refreshBtn.addActionListener(e -> refreshAlerts());
 
-        JButton alertsBtn = createStyledButton("📢 ALERTS", new Color(100, 200, 255));
-        alertsBtn.setBounds(150, 665, 120, 40);
-        alertsBtn.addActionListener(e -> mainFrame.showAlertsPage(citizen));
+        JButton refreshBtn = ComponentFactory.createSuccessButton(
+                "🔄 REFRESH", this::refreshAlerts);
+        refreshBtn.setBounds(PADDING, yPos, 120, 40);
 
-        JButton notificationsBtn = createStyledButton("🔔 NOTIFICATIONS", new Color(255, 200, 100));
-        notificationsBtn.setBounds(280, 665, 140, 40);
-        notificationsBtn.addActionListener(e -> mainFrame.showRiskAssessment(citizen));
+        JButton alertsBtn = ComponentFactory.createPrimaryButton(
+                "🔔 ALERTS", () -> mainFrame.showAlertsPage(citizen));
+        alertsBtn.setBounds(150, yPos, 120, 40);
 
-        JButton reportBtn = createStyledButton("🆘 REPORT", new Color(255, 150, 100));
-        reportBtn.setBounds(430, 665, 120, 40);
-        reportBtn.addActionListener(e -> showReportDialog());
+        JButton notificationsBtn = ComponentFactory.createWarningButton(
+                "📢 NOTIFICATIONS", () -> mainFrame.showRiskAssessment(citizen));
+        notificationsBtn.setBounds(280, yPos, 140, 40);
 
-        JButton riskBtn = createStyledButton("📊 RISK", new Color(255, 150, 100));
-        riskBtn.setBounds(560, 665, 100, 40);
-        riskBtn.addActionListener(e -> mainFrame.showRiskAssessment(citizen));
+        JButton reportBtn = ComponentFactory.createWarningButton(
+                "🆘 REPORT", this::showReportDialog);
+        reportBtn.setBounds(430, yPos, 120, 40);
 
-        JButton logoutBtn = createStyledButton("LOGOUT", new Color(255, 100, 100));
-        logoutBtn.setBounds(740, 665, 120, 40);
-        logoutBtn.addActionListener(e -> mainFrame.logout());
+        JButton riskBtn = ComponentFactory.createDangerButton(
+                "📊 RISK", () -> mainFrame.showRiskAssessment(citizen));
+        riskBtn.setBounds(560, yPos, 100, 40);
+
+        JButton logoutBtn = ComponentFactory.createDangerButton(
+                "🚪 LOGOUT", () -> mainFrame.logout());
+        logoutBtn.setBounds(740, yPos, 120, 40);
+
 
         add(headerLabel);
         add(userLabel);
         add(infoLabel);
         add(searchPanel);
         add(filterPanel);
-        add(notificationsBtn);
         add(mapPanel);
         add(alertsLabel);
-        add(riskBtn);
         add(scrollPane);
         add(refreshBtn);
         add(alertsBtn);
+        add(notificationsBtn);
         add(reportBtn);
+        add(riskBtn);
         add(logoutBtn);
     }
 
+
+    private JPanel createSearchPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        panel.setBackground(AppTheme.BG_DARK);
+
+        JLabel searchLabel = new JLabel("📍 Search Location:");
+        searchLabel.setForeground(AppTheme.TEXT_WHITE);
+        searchLabel.setFont(AppTheme.FONT_LABEL);
+
+        searchField = new JTextField(20);
+        UIUtils.styleTextField(searchField);
+
+        searchBtn = ComponentFactory.createPrimaryButton(
+                "🔍 Search", this::performSearch);
+
+        panel.add(searchLabel);
+        panel.add(searchField);
+        panel.add(searchBtn);
+
+        return panel;
+    }
+
+
+    private JPanel createFilterPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        panel.setBackground(AppTheme.BG_DARK);
+
+        JLabel filterLabel = new JLabel("Filter by:");
+        filterLabel.setForeground(AppTheme.TEXT_WHITE);
+        filterLabel.setFont(AppTheme.FONT_LABEL);
+
+        typeFilterCombo = new JComboBox<>(new String[]{
+                "All Types", "Flood", "Earthquake", "Fire",
+                "Cyclone", "Landslide", "Tsunami", "Tornado"
+        });
+        UIUtils.styleComboBox(typeFilterCombo);
+        typeFilterCombo.addActionListener(e -> performFilter());
+
+        JLabel severityLabel = new JLabel("Min Severity:");
+        severityLabel.setForeground(AppTheme.TEXT_WHITE);
+        severityLabel.setFont(AppTheme.FONT_LABEL);
+
+        severitySlider = new JSlider(1, 10, 1);
+        severitySlider.setMajorTickSpacing(1);
+        severitySlider.setPaintTicks(true);
+        severitySlider.setPaintLabels(true);
+        severitySlider.setBackground(AppTheme.BG_DARK);
+        severitySlider.setForeground(AppTheme.TEXT_WHITE);
+        severitySlider.setPreferredSize(new Dimension(150, 50));
+        severitySlider.addChangeListener(e -> performFilter());
+
+        JButton filterBtn = ComponentFactory.createSuccessButton(
+                "Apply Filter", this::performFilter);
+
+        panel.add(filterLabel);
+        panel.add(typeFilterCombo);
+        panel.add(severityLabel);
+        panel.add(severitySlider);
+        panel.add(filterBtn);
+
+        return panel;
+    }
+
+
     private void refreshAlerts() {
+        Logger.debug(CLASS_NAME, "Refreshing alerts for user: " + citizen.getUsername());
         disasterCardsPanel.removeAll();
         List<Disaster> disasters = disasterDAO.getActiveDisasters();
         currentDisasters = disasters;
 
         if (disasters.isEmpty()) {
-            JLabel noAlertsLabel = new JLabel("✓ No active disasters in your area. Stay Safe!");
-            noAlertsLabel.setFont(new Font("Arial", Font.BOLD, 16));
-            noAlertsLabel.setForeground(new Color(100, 255, 150));
+            JLabel noAlertsLabel = new JLabel("✅ No active disasters in your area. Stay Safe!");
+            noAlertsLabel.setFont(AppTheme.FONT_LABEL);
+            noAlertsLabel.setForeground(AppTheme.COLOR_GREEN);
             disasterCardsPanel.add(noAlertsLabel);
         } else {
             for (Disaster d : disasters) {
@@ -198,15 +234,17 @@ public class CitizenDashboard extends JPanel {
         disasterCardsPanel.repaint();
 
         mapPanel.displayDisastersOnMap(disasters);
+        Logger.info(CLASS_NAME, "Alerts refreshed - Total: " + disasters.size());
     }
+
 
     private JPanel createDisasterCard(Disaster d) {
         JPanel card = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
 
                 Color baseColor = d.getSeverity() >= 8 ? new Color(220, 60, 60) :
                         d.getSeverity() >= 5 ? new Color(230, 120, 50) :
@@ -216,7 +254,8 @@ public class CitizenDashboard extends JPanel {
                         d.getSeverity() >= 5 ? new Color(200, 90, 20) :
                                 new Color(70, 110, 170);
 
-                GradientPaint gradient = new GradientPaint(0, 0, baseColor, getWidth(), getHeight(), darkColor);
+                GradientPaint gradient = new GradientPaint(0, 0, baseColor,
+                        getWidth(), getHeight(), darkColor);
                 g2d.setPaint(gradient);
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
 
@@ -233,32 +272,32 @@ public class CitizenDashboard extends JPanel {
         iconLabel.setBounds(12, 10, 55, 55);
 
         JLabel typeLabel = new JLabel(d.getType().toUpperCase());
-        typeLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        typeLabel.setForeground(Color.WHITE);
+        typeLabel.setFont(AppTheme.FONT_HEADER);
+        typeLabel.setForeground(AppTheme.TEXT_WHITE);
         typeLabel.setBounds(75, 8, 180, 24);
 
         JLabel locationLabel = new JLabel("📍 " + d.getLocation());
-        locationLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        locationLabel.setFont(AppTheme.FONT_REGULAR);
         locationLabel.setForeground(new Color(255, 255, 255, 220));
         locationLabel.setBounds(75, 32, 250, 18);
 
         JLabel severityLabel = new JLabel("Lvl: " + d.getSeverity() + "/10");
-        severityLabel.setFont(new Font("Arial", Font.BOLD, 11));
-        severityLabel.setForeground(Color.WHITE);
+        severityLabel.setFont(AppTheme.FONT_REGULAR);
+        severityLabel.setForeground(AppTheme.TEXT_WHITE);
         severityLabel.setBackground(new Color(0, 0, 0, 100));
         severityLabel.setOpaque(true);
         severityLabel.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
         severityLabel.setBounds(330, 8, 75, 24);
 
-        JLabel timeLabel = new JLabel("🕒 " + d.getTimestamp());
-        timeLabel.setFont(new Font("Arial", Font.PLAIN, 10));
+        JLabel timeLabel = new JLabel("🕐 " + d.getTimestamp());
+        timeLabel.setFont(AppTheme.FONT_SMALL);
         timeLabel.setForeground(new Color(200, 200, 200));
         timeLabel.setBounds(415, 8, 200, 18);
 
         String desc = d.getDescription().length() > 35 ?
                 d.getDescription().substring(0, 35) + "..." : d.getDescription();
         JLabel descLabel = new JLabel(desc);
-        descLabel.setFont(new Font("Arial", Font.PLAIN, 10));
+        descLabel.setFont(AppTheme.FONT_SMALL);
         descLabel.setForeground(new Color(240, 240, 240));
         descLabel.setBounds(415, 32, 320, 18);
 
@@ -272,10 +311,11 @@ public class CitizenDashboard extends JPanel {
         return card;
     }
 
+
     private String getDisasterIcon(String type) {
         return switch (type.toLowerCase()) {
             case "flood" -> "🌊";
-            case "earthquake" -> "🏔️";
+            case "earthquake" -> "🏚️";
             case "fire" -> "🔥";
             case "cyclone" -> "🌪️";
             case "landslide" -> "⛰️";
@@ -285,24 +325,23 @@ public class CitizenDashboard extends JPanel {
         };
     }
 
+
     private void showReportDialog() {
+        Logger.debug(CLASS_NAME, "Opening disaster report dialog");
+
         JPanel panel = new JPanel(new GridLayout(5, 1, 10, 10));
-        panel.setBackground(new Color(40, 50, 80));
+        panel.setBackground(AppTheme.BG_MEDIUM);
 
         JTextField typeField = new JTextField("Flood");
-        typeField.setBackground(new Color(50, 60, 90));
-        typeField.setForeground(Color.WHITE);
+        UIUtils.styleTextField(typeField);
 
         JTextField locationField = new JTextField(citizen.getLocation());
-        locationField.setBackground(new Color(50, 60, 90));
-        locationField.setForeground(Color.WHITE);
+        UIUtils.styleTextField(locationField);
 
         JSpinner severitySpinner = new JSpinner(new SpinnerNumberModel(5, 1, 10, 1));
 
         JTextArea descriptionArea = new JTextArea(3, 20);
-        descriptionArea.setBackground(new Color(50, 60, 90));
-        descriptionArea.setForeground(Color.WHITE);
-        descriptionArea.setLineWrap(true);
+        UIUtils.styleTextArea(descriptionArea);
 
         panel.add(new JLabel("Disaster Type:"));
         panel.add(typeField);
@@ -313,7 +352,8 @@ public class CitizenDashboard extends JPanel {
         panel.add(new JLabel("Description:"));
         panel.add(new JScrollPane(descriptionArea));
 
-        int result = JOptionPane.showConfirmDialog(this, panel, "Report Disaster", JOptionPane.OK_CANCEL_OPTION);
+        int result = JOptionPane.showConfirmDialog(this, panel, "Report Disaster",
+                JOptionPane.OK_CANCEL_OPTION);
 
         if (result == JOptionPane.OK_OPTION) {
             DisasterReport report = new DisasterReport(
@@ -327,33 +367,17 @@ public class CitizenDashboard extends JPanel {
 
             DisasterReportDAO reportDAO = new DisasterReportDAO();
             if (reportDAO.submitReport(report)) {
-                JOptionPane.showMessageDialog(this, "✓ Disaster Report Submitted!\nThank you for reporting.",
-                        "Success", JOptionPane.INFORMATION_MESSAGE);
+                Logger.info(CLASS_NAME, "Disaster report submitted by: " + citizen.getUsername());
+                UIUtils.showInfo(this, "Success",
+                        "✅ Disaster Report Submitted!\nThank you for reporting.");
             } else {
-                JOptionPane.showMessageDialog(this, "Failed to submit report", "Error", JOptionPane.ERROR_MESSAGE);
+                Logger.warn(CLASS_NAME, "Failed to submit disaster report");
+                UIUtils.showError(this, "Error",
+                        "Failed to submit report");
             }
         }
     }
 
-    private JButton createStyledButton(String text, Color color) {
-        JButton btn = new JButton(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setColor(color);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
-                super.paintComponent(g);
-            }
-        };
-        btn.setFont(new Font("Arial", Font.BOLD, 12));
-        btn.setForeground(Color.WHITE);
-        btn.setContentAreaFilled(false);
-        btn.setBorderPainted(false);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return btn;
-    }
 
     private void performSearch() {
         String searchText = searchField.getText().trim();
@@ -363,13 +387,14 @@ public class CitizenDashboard extends JPanel {
             return;
         }
 
+        Logger.debug(CLASS_NAME, "Searching disasters at location: " + searchText);
         List<Disaster> searchResults = disasterDAO.searchByLocation(searchText);
         disasterCardsPanel.removeAll();
 
         if (searchResults.isEmpty()) {
             JLabel noResultsLabel = new JLabel("❌ No disasters found in: " + searchText);
-            noResultsLabel.setFont(new Font("Arial", Font.BOLD, 14));
-            noResultsLabel.setForeground(new Color(255, 100, 100));
+            noResultsLabel.setFont(AppTheme.FONT_LABEL);
+            noResultsLabel.setForeground(AppTheme.COLOR_RED);
             disasterCardsPanel.add(noResultsLabel);
         } else {
             for (Disaster d : searchResults) {
@@ -383,13 +408,16 @@ public class CitizenDashboard extends JPanel {
 
         disasterCardsPanel.revalidate();
         disasterCardsPanel.repaint();
-
         mapPanel.displayDisastersOnMap(searchResults);
+        Logger.info(CLASS_NAME, "Search results: " + searchResults.size());
     }
+
 
     private void performFilter() {
         String selectedType = (String) typeFilterCombo.getSelectedItem();
         int minSeverity = severitySlider.getValue();
+
+        Logger.debug(CLASS_NAME, "Filtering: Type=" + selectedType + ", MinSeverity=" + minSeverity);
 
         List<Disaster> filteredDisasters = new ArrayList<>();
 
@@ -413,9 +441,9 @@ public class CitizenDashboard extends JPanel {
         disasterCardsPanel.removeAll();
 
         if (finalResults.isEmpty()) {
-            JLabel noResultsLabel = new JLabel("✓ No disasters matching filters. Stay Safe!");
-            noResultsLabel.setFont(new Font("Arial", Font.BOLD, 14));
-            noResultsLabel.setForeground(new Color(100, 255, 150));
+            JLabel noResultsLabel = new JLabel("✅ No disasters matching filters. Stay Safe!");
+            noResultsLabel.setFont(AppTheme.FONT_LABEL);
+            noResultsLabel.setForeground(AppTheme.COLOR_GREEN);
             disasterCardsPanel.add(noResultsLabel);
         } else {
             for (Disaster d : finalResults) {
@@ -429,7 +457,7 @@ public class CitizenDashboard extends JPanel {
 
         disasterCardsPanel.revalidate();
         disasterCardsPanel.repaint();
-
         mapPanel.displayDisastersOnMap(finalResults);
+        Logger.info(CLASS_NAME, "Filter results: " + finalResults.size());
     }
 }

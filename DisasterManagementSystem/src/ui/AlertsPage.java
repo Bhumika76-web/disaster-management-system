@@ -9,12 +9,21 @@ import models.Disaster;
 import models.HelpRequest;
 import dao.DisasterDAO;
 import dao.HelpRequestDAO;
+import ui.components.ComponentFactory;
+import ui.theme.AppTheme;
+import ui.utils.UIUtils;
+import util.Logger;
+import config.AppConstants;
+
 
 public class AlertsPage extends JPanel {
+
+    private static final String CLASS_NAME = "AlertsPage";
+
     private User user;
     private MainFrame mainFrame;
-    private DisasterDAO disasterDAO = new DisasterDAO();
-    private HelpRequestDAO helpRequestDAO = new HelpRequestDAO();
+    private DisasterDAO disasterDAO;
+    private HelpRequestDAO helpRequestDAO;
     private JPanel activeAlertsPanel;
     private JPanel helpRequestsPanel;
     private boolean isAdmin;
@@ -23,58 +32,60 @@ public class AlertsPage extends JPanel {
     public AlertsPage(User user, MainFrame mainFrame) {
         this.user = user;
         this.mainFrame = mainFrame;
-        this.isAdmin = "admin".equals(user.getUserType());
-        this.isResponder = "responder".equals(user.getUserType());
+        this.disasterDAO = new DisasterDAO();
+        this.helpRequestDAO = new HelpRequestDAO();
+        this.isAdmin = AppConstants.USER_TYPE_ADMIN.equals(user.getUserType());
+        this.isResponder = AppConstants.USER_TYPE_RESPONDER.equals(user.getUserType());
 
         setLayout(null);
-        setBackground(new Color(20, 25, 47));
+        setBackground(AppTheme.BG_DARK);
 
+        Logger.info(CLASS_NAME, "Initializing AlertsPage for: " + user.getUsername());
         initUI();
         refreshAlerts();
     }
 
+
     private void initUI() {
         int yPos = 15;
 
-        JButton backBtn = createIconButton("←", new Color(80, 100, 140));
+        JButton backBtn = ComponentFactory.createPrimaryButton("↶", () -> mainFrame.showDashboard(user));
         backBtn.setBounds(20, yPos, 35, 35);
-        backBtn.addActionListener(e -> mainFrame.showDashboard(user));
 
-        JLabel headerLabel = new JLabel("Alerts");
-        headerLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        headerLabel.setForeground(Color.WHITE);
+        JLabel headerLabel = ComponentFactory.createTitleLabel(
+                "🔔 Alerts", AppTheme.TEXT_WHITE);
         headerLabel.setBounds(70, yPos, 300, 35);
-
         yPos += 50;
 
-        if (isAdmin) {
-            JLabel broadcastTitle = new JLabel("Broadcast Alert");
-            broadcastTitle.setFont(new Font("Arial", Font.BOLD, 16));
-            broadcastTitle.setForeground(new Color(100, 200, 255));
-            broadcastTitle.setBounds(20, yPos, 200, 25);
 
+        if (isAdmin) {
+            JLabel broadcastTitle = ComponentFactory.createHeaderLabel(
+                    "Broadcast Alert", AppTheme.COLOR_BLUE);
+            broadcastTitle.setBounds(20, yPos, 200, 25);
             yPos += 30;
 
-            JTextField titleField = createStyledTextField("Enter alert title");
+            JTextField titleField = new JTextField();
+            UIUtils.styleTextField(titleField);
+            UIUtils.addFieldPlaceholder(titleField, "Enter alert title");
             titleField.setBounds(20, yPos, 860, 40);
             yPos += 50;
 
-            JTextArea descArea = createStyledTextArea("Enter alert description");
+            JTextArea descArea = new JTextArea();
+            UIUtils.styleTextArea(descArea);
             descArea.setBounds(20, yPos, 860, 80);
             yPos += 90;
 
-            JComboBox<String> zoneCombo = createStyledCombo(new String[]{
+            JComboBox<String> zoneCombo = new JComboBox<>(new String[]{
                     "Select Zone", "Coastal Area", "Mountain Region", "Urban Area",
                     "Rural Area", "Flood Zone", "Earthquake Zone"
             });
+            UIUtils.styleComboBox(zoneCombo);
             zoneCombo.setBounds(20, yPos, 200, 35);
 
-            yPos += 50;
-
-            JButton broadcastBtn = createStyledButton("Broadcast Alert", new Color(50, 255, 100));
-            broadcastBtn.setBounds(20, yPos, 200, 45);
-            broadcastBtn.setFont(new Font("Arial", Font.BOLD, 14));
-            broadcastBtn.addActionListener(e -> handleBroadcast(titleField, descArea, zoneCombo));
+            JButton broadcastBtn = ComponentFactory.createSuccessButton(
+                    "Broadcast Alert", () -> handleBroadcast(titleField, descArea, zoneCombo));
+            broadcastBtn.setBounds(20, yPos + 50, 200, 45);
+            broadcastBtn.setFont(AppTheme.FONT_LABEL);
 
             add(broadcastTitle);
             add(titleField);
@@ -82,52 +93,50 @@ public class AlertsPage extends JPanel {
             add(zoneCombo);
             add(broadcastBtn);
 
-            yPos += 60;
+            yPos += 110;
         }
 
-        JLabel activeTitle = new JLabel("Active Alerts");
-        activeTitle.setFont(new Font("Arial", Font.BOLD, 16));
-        activeTitle.setForeground(new Color(100, 200, 255));
+        JLabel activeTitle = ComponentFactory.createHeaderLabel(
+                "Active Alerts", AppTheme.COLOR_BLUE);
         activeTitle.setBounds(20, yPos, 200, 25);
-
         yPos += 30;
 
         activeAlertsPanel = new JPanel();
         activeAlertsPanel.setLayout(new BoxLayout(activeAlertsPanel, BoxLayout.Y_AXIS));
-        activeAlertsPanel.setBackground(new Color(20, 25, 47));
+        activeAlertsPanel.setBackground(AppTheme.BG_DARK);
         activeAlertsPanel.setOpaque(false);
 
-        JScrollPane activeScroll = new JScrollPane(activeAlertsPanel);
+        JScrollPane activeScroll = UIUtils.createThemedScrollPane(activeAlertsPanel);
         activeScroll.setBounds(20, yPos, 860, 100);
-        activeScroll.setBackground(new Color(20, 25, 47));
-        activeScroll.setBorder(BorderFactory.createLineBorder(new Color(60, 80, 120), 1));
-        activeScroll.getVerticalScrollBar().setUnitIncrement(15);
-
         yPos += 120;
 
-        if (!isAdmin && !isResponder) {
-            JLabel helpFormTitle = new JLabel("Request Help");
-            helpFormTitle.setFont(new Font("Arial", Font.BOLD, 16));
-            helpFormTitle.setForeground(new Color(255, 150, 100));
-            helpFormTitle.setBounds(20, yPos, 200, 25);
 
+        if (!isAdmin && !isResponder) {
+            JLabel helpFormTitle = ComponentFactory.createHeaderLabel(
+                    "Request Help", AppTheme.COLOR_ORANGE);
+            helpFormTitle.setBounds(20, yPos, 200, 25);
             yPos += 30;
 
-            JTextField descField = createStyledTextField("Describe what help you need");
+            JTextField descField = new JTextField();
+            UIUtils.styleTextField(descField);
+            UIUtils.addFieldPlaceholder(descField, "Describe what help you need");
             descField.setBounds(20, yPos, 860, 35);
             yPos += 45;
 
-            JComboBox<String> typeCombo = createStyledCombo(new String[]{
+            JComboBox<String> typeCombo = new JComboBox<>(new String[]{
                     "Select Help Type", "Medical", "Shelter", "Food", "Missing Person", "Other"
             });
+            UIUtils.styleComboBox(typeCombo);
             typeCombo.setBounds(20, yPos, 200, 35);
 
-            JTextField phoneField = createStyledTextField("Contact Number");
+            JTextField phoneField = new JTextField();
+            UIUtils.styleTextField(phoneField);
+            UIUtils.addFieldPlaceholder(phoneField, "Contact Number");
             phoneField.setBounds(230, yPos, 200, 35);
 
-            JButton submitBtn = createStyledButton("Submit Request", new Color(255, 150, 100));
+            JButton submitBtn = ComponentFactory.createWarningButton(
+                    "Submit Request", () -> handleHelpRequest(descField, typeCombo, phoneField));
             submitBtn.setBounds(440, yPos, 150, 35);
-            submitBtn.addActionListener(e -> handleHelpRequest(descField, typeCombo, phoneField));
 
             add(helpFormTitle);
             add(descField);
@@ -138,32 +147,22 @@ public class AlertsPage extends JPanel {
             yPos += 50;
         }
 
-        String helpTitle = "";
-        if (isAdmin) {
-            helpTitle = "Help Requests (All)";
-        } else if (isResponder) {
-            helpTitle = "Help Requests (Available to Accept)";
-        } else {
-            helpTitle = "My Help Requests";
-        }
+        String helpTitle = isAdmin ? "Help Requests (All)" :
+                isResponder ? "Help Requests (Available to Accept)" :
+                        "My Help Requests";
 
-        JLabel helpTitleLabel = new JLabel(helpTitle);
-        helpTitleLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        helpTitleLabel.setForeground(new Color(100, 200, 255));
+        JLabel helpTitleLabel = ComponentFactory.createHeaderLabel(
+                helpTitle, AppTheme.COLOR_BLUE);
         helpTitleLabel.setBounds(20, yPos, 500, 25);
-
         yPos += 30;
 
         helpRequestsPanel = new JPanel();
         helpRequestsPanel.setLayout(new BoxLayout(helpRequestsPanel, BoxLayout.Y_AXIS));
-        helpRequestsPanel.setBackground(new Color(20, 25, 47));
+        helpRequestsPanel.setBackground(AppTheme.BG_DARK);
         helpRequestsPanel.setOpaque(false);
 
-        JScrollPane helpScroll = new JScrollPane(helpRequestsPanel);
+        JScrollPane helpScroll = UIUtils.createThemedScrollPane(helpRequestsPanel);
         helpScroll.setBounds(20, yPos, 860, 150);
-        helpScroll.setBackground(new Color(20, 25, 47));
-        helpScroll.setBorder(BorderFactory.createLineBorder(new Color(60, 80, 120), 1));
-        helpScroll.getVerticalScrollBar().setUnitIncrement(15);
 
         add(backBtn);
         add(headerLabel);
@@ -173,15 +172,18 @@ public class AlertsPage extends JPanel {
         add(helpScroll);
     }
 
+
     private void refreshAlerts() {
+        Logger.debug(CLASS_NAME, "Refreshing alerts");
+
 
         activeAlertsPanel.removeAll();
         List<Disaster> activeDisasters = disasterDAO.getActiveDisasters();
 
         if (activeDisasters.isEmpty()) {
-            JLabel noAlertsLabel = new JLabel("✓ No active alerts");
-            noAlertsLabel.setFont(new Font("Arial", Font.PLAIN, 13));
-            noAlertsLabel.setForeground(new Color(100, 200, 100));
+            JLabel noAlertsLabel = new JLabel("✅ No active alerts");
+            noAlertsLabel.setFont(AppTheme.FONT_REGULAR);
+            noAlertsLabel.setForeground(AppTheme.COLOR_GREEN);
             activeAlertsPanel.add(noAlertsLabel);
         } else {
             for (Disaster d : activeDisasters) {
@@ -195,30 +197,31 @@ public class AlertsPage extends JPanel {
         activeAlertsPanel.revalidate();
         activeAlertsPanel.repaint();
 
+
         helpRequestsPanel.removeAll();
         loadHelpRequests();
         helpRequestsPanel.revalidate();
         helpRequestsPanel.repaint();
+
+        Logger.info(CLASS_NAME, "Alerts refreshed");
     }
+
 
     private void loadHelpRequests() {
         List<HelpRequest> requests;
 
         if (isAdmin) {
-
             requests = helpRequestDAO.getPendingHelpRequests();
         } else if (isResponder) {
-
             requests = helpRequestDAO.getPendingHelpRequests();
         } else {
-
             requests = helpRequestDAO.getUserHelpRequests(user.getId());
         }
 
         if (requests.isEmpty()) {
-            JLabel noRequestsLabel = new JLabel("✓ No help requests");
-            noRequestsLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-            noRequestsLabel.setForeground(new Color(100, 200, 100));
+            JLabel noRequestsLabel = new JLabel("✅ No help requests");
+            noRequestsLabel.setFont(AppTheme.FONT_REGULAR);
+            noRequestsLabel.setForeground(AppTheme.COLOR_GREEN);
             helpRequestsPanel.add(noRequestsLabel);
         } else {
             for (HelpRequest req : requests) {
@@ -231,18 +234,17 @@ public class AlertsPage extends JPanel {
         }
     }
 
+
     private JPanel createAlertCard(Disaster d) {
         JPanel card = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                Color bgColor = new Color(40, 60, 100);
-                g2d.setColor(bgColor);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setColor(AppTheme.BG_LIGHT);
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-
-                g2d.setColor(new Color(100, 150, 255));
+                g2d.setColor(AppTheme.COLOR_BLUE);
                 g2d.setStroke(new BasicStroke(1.5f));
                 g2d.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 10, 10);
             }
@@ -255,17 +257,17 @@ public class AlertsPage extends JPanel {
         iconLabel.setBounds(12, 8, 45, 50);
 
         JLabel titleLabel = new JLabel(d.getType());
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 13));
-        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setFont(AppTheme.FONT_LABEL);
+        titleLabel.setForeground(AppTheme.TEXT_WHITE);
         titleLabel.setBounds(65, 8, 200, 20);
 
         JLabel zoneLabel = new JLabel("📍 " + d.getLocation());
-        zoneLabel.setFont(new Font("Arial", Font.PLAIN, 10));
-        zoneLabel.setForeground(new Color(150, 200, 255));
+        zoneLabel.setFont(AppTheme.FONT_REGULAR);
+        zoneLabel.setForeground(AppTheme.TEXT_SECONDARY);
         zoneLabel.setBounds(65, 30, 300, 18);
 
-        JLabel timeLabel = new JLabel("🕒 " + d.getTimestamp());
-        timeLabel.setFont(new Font("Arial", Font.PLAIN, 9));
+        JLabel timeLabel = new JLabel("🕐 " + d.getTimestamp());
+        timeLabel.setFont(AppTheme.FONT_SMALL);
         timeLabel.setForeground(new Color(180, 180, 180));
         timeLabel.setBounds(65, 48, 250, 15);
 
@@ -277,20 +279,20 @@ public class AlertsPage extends JPanel {
         return card;
     }
 
+
     private JPanel createHelpRequestCard(HelpRequest req) {
         JPanel card = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                Color bgColor = new Color(50, 70, 110);
-                g2d.setColor(bgColor);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setColor(AppTheme.BG_LIGHT);
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
 
-                Color borderColor = isResponder ? new Color(100, 200, 255) :
-                        isAdmin ? new Color(255, 150, 100) :
-                                new Color(100, 255, 150);
+                Color borderColor = isResponder ? AppTheme.COLOR_BLUE :
+                        isAdmin ? AppTheme.COLOR_ORANGE :
+                                AppTheme.COLOR_GREEN;
                 g2d.setColor(borderColor);
                 g2d.setStroke(new BasicStroke(1.5f));
                 g2d.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 10, 10);
@@ -304,42 +306,31 @@ public class AlertsPage extends JPanel {
         iconLabel.setBounds(12, 12, 55, 55);
 
         JLabel nameLabel = new JLabel(req.getUsername() + " - " + req.getRequestType());
-        nameLabel.setFont(new Font("Arial", Font.BOLD, 13));
-        nameLabel.setForeground(Color.WHITE);
+        nameLabel.setFont(AppTheme.FONT_LABEL);
+        nameLabel.setForeground(AppTheme.TEXT_WHITE);
         nameLabel.setBounds(75, 10, 380, 20);
 
         JLabel descLabel = new JLabel(req.getDescription());
-        descLabel.setFont(new Font("Arial", Font.PLAIN, 10));
+        descLabel.setFont(AppTheme.FONT_REGULAR);
         descLabel.setForeground(new Color(200, 200, 200));
         descLabel.setBounds(75, 32, 450, 16);
 
         JLabel locLabel = new JLabel("📍 " + req.getLocation() + " | 📞 " + req.getContactNumber());
-        locLabel.setFont(new Font("Arial", Font.PLAIN, 9));
-        locLabel.setForeground(new Color(150, 200, 255));
+        locLabel.setFont(AppTheme.FONT_SMALL);
+        locLabel.setForeground(AppTheme.TEXT_SECONDARY);
         locLabel.setBounds(75, 52, 500, 15);
 
         if (isResponder) {
-            JButton acceptBtn = createStyledButton("ACCEPT", new Color(100, 255, 100));
+            JButton acceptBtn = ComponentFactory.createSuccessButton("ACCEPT",
+                    () -> handleAcceptResponderRequest(req));
             acceptBtn.setBounds(720, 18, 100, 50);
-            acceptBtn.setFont(new Font("Arial", Font.BOLD, 12));
-            acceptBtn.addActionListener(e -> {
-                helpRequestDAO.updateRequestStatus(req.getId(), "in_progress");
-                JOptionPane.showMessageDialog(this,
-                        "✓ Help Request Accepted!\nResponding to: " + req.getUsername(),
-                        "Success", JOptionPane.INFORMATION_MESSAGE);
-                refreshAlerts();
-            });
+            acceptBtn.setFont(AppTheme.FONT_REGULAR);
             card.add(acceptBtn);
-        }
-
-        else if (isAdmin) {
-            JButton respondBtn = createStyledButton("Respond", new Color(100, 200, 255));
+        } else if (isAdmin) {
+            JButton respondBtn = ComponentFactory.createPrimaryButton("Respond",
+                    () -> handleAdminRespond(req));
             respondBtn.setBounds(720, 18, 100, 50);
-            respondBtn.setFont(new Font("Arial", Font.BOLD, 12));
-            respondBtn.addActionListener(e -> {
-                helpRequestDAO.updateRequestStatus(req.getId(), "responded");
-                refreshAlerts();
-            });
+            respondBtn.setFont(AppTheme.FONT_REGULAR);
             card.add(respondBtn);
         }
 
@@ -351,9 +342,10 @@ public class AlertsPage extends JPanel {
         return card;
     }
 
+
     private String getHelpTypeIcon(String type) {
         return switch (type.toLowerCase()) {
-            case "medical" -> "🚑";
+            case "medical" -> "🏥";
             case "shelter" -> "🏠";
             case "food" -> "🍽️";
             case "missing person" -> "👤";
@@ -361,39 +353,39 @@ public class AlertsPage extends JPanel {
         };
     }
 
+
     private void handleBroadcast(JTextField titleField, JTextArea descArea, JComboBox<String> zoneCombo) {
         String title = titleField.getText().trim();
         String desc = descArea.getText().trim();
         String zone = (String) zoneCombo.getSelectedItem();
 
         if (title.isEmpty() || desc.isEmpty() || zone.equals("Select Zone")) {
-            JOptionPane.showMessageDialog(this, "Please fill all fields!",
-                    "Validation Error", JOptionPane.WARNING_MESSAGE);
+            UIUtils.showWarning(this, "Validation Error", "Please fill all fields!");
             return;
         }
 
-        Disaster alert = new Disaster(title, zone, 8, desc, java.time.LocalDateTime.now().toString());
+        Disaster alert = new Disaster(title, zone, 8, desc,
+                java.time.LocalDateTime.now().toString());
+
         if (disasterDAO.addDisaster(alert)) {
-            JOptionPane.showMessageDialog(this, "✓ Alert Broadcast Successfully!",
-                    "Success", JOptionPane.INFORMATION_MESSAGE);
+            Logger.info(CLASS_NAME, "Alert broadcasted: " + title);
+            UIUtils.showInfo(this, "Success", "✅ Alert Broadcast Successfully!");
             titleField.setText("");
             descArea.setText("");
             zoneCombo.setSelectedIndex(0);
             refreshAlerts();
-        } else {
-            JOptionPane.showMessageDialog(this, "Failed to broadcast alert",
-                    "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void handleHelpRequest(JTextField descField, JComboBox<String> typeCombo, JTextField phoneField) {
+
+    private void handleHelpRequest(JTextField descField, JComboBox<String> typeCombo,
+                                   JTextField phoneField) {
         String desc = descField.getText().trim();
         String type = (String) typeCombo.getSelectedItem();
         String phone = phoneField.getText().trim();
 
         if (desc.isEmpty() || type.equals("Select Help Type") || phone.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill all fields!",
-                    "Validation Error", JOptionPane.WARNING_MESSAGE);
+            UIUtils.showWarning(this, "Validation Error", "Please fill all fields!");
             return;
         }
 
@@ -401,115 +393,31 @@ public class AlertsPage extends JPanel {
                 user.getLocation(), type, phone);
 
         if (helpRequestDAO.submitHelpRequest(request)) {
-            JOptionPane.showMessageDialog(this, "✓ Help Request Submitted!\nResponders will be notified soon.",
-                    "Success", JOptionPane.INFORMATION_MESSAGE);
+            Logger.info(CLASS_NAME, "Help request submitted by: " + user.getUsername());
+            UIUtils.showInfo(this, "Success",
+                    "✅ Help Request Submitted!\nResponders will be notified soon.");
             descField.setText("");
             typeCombo.setSelectedIndex(0);
             phoneField.setText("");
             refreshAlerts();
-        } else {
-            JOptionPane.showMessageDialog(this, "Failed to submit help request",
-                    "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private JTextField createStyledTextField(String placeholder) {
-        JTextField field = new JTextField(placeholder);
-        field.setFont(new Font("Arial", Font.PLAIN, 12));
-        field.setBackground(new Color(40, 55, 85));
-        field.setForeground(new Color(180, 180, 180));
-        field.setCaretColor(Color.WHITE);
-        field.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
 
-        field.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent e) {
-                if (field.getText().equals(placeholder)) {
-                    field.setText("");
-                    field.setForeground(Color.WHITE);
-                }
-            }
-            public void focusLost(java.awt.event.FocusEvent e) {
-                if (field.getText().isEmpty()) {
-                    field.setText(placeholder);
-                    field.setForeground(new Color(180, 180, 180));
-                }
-            }
-        });
-        return field;
+    private void handleAcceptResponderRequest(HelpRequest req) {
+        Logger.debug(CLASS_NAME, "Responder accepting request: " + req.getId());
+        if (helpRequestDAO.updateRequestStatus(req.getId(), "in_progress")) {
+            UIUtils.showInfo(this, "Success",
+                    "✅ Help Request Accepted!\nResponding to: " + req.getUsername());
+            refreshAlerts();
+        }
     }
 
-    private JTextArea createStyledTextArea(String placeholder) {
-        JTextArea area = new JTextArea(placeholder);
-        area.setFont(new Font("Arial", Font.PLAIN, 12));
-        area.setBackground(new Color(40, 55, 85));
-        area.setForeground(new Color(180, 180, 180));
-        area.setCaretColor(Color.WHITE);
-        area.setLineWrap(true);
-        area.setWrapStyleWord(true);
-        area.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
 
-        area.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent e) {
-                if (area.getText().equals(placeholder)) {
-                    area.setText("");
-                    area.setForeground(Color.WHITE);
-                }
-            }
-            public void focusLost(java.awt.event.FocusEvent e) {
-                if (area.getText().isEmpty()) {
-                    area.setText(placeholder);
-                    area.setForeground(new Color(180, 180, 180));
-                }
-            }
-        });
-        return area;
-    }
-
-    private JComboBox<String> createStyledCombo(String[] items) {
-        JComboBox<String> combo = new JComboBox<>(items);
-        combo.setFont(new Font("Arial", Font.PLAIN, 12));
-        combo.setBackground(new Color(40, 55, 85));
-        combo.setForeground(Color.WHITE);
-        combo.setBorder(BorderFactory.createLineBorder(new Color(60, 80, 120), 1));
-        return combo;
-    }
-
-    private JButton createStyledButton(String text, Color color) {
-        JButton btn = new JButton(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setColor(color);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                super.paintComponent(g);
-            }
-        };
-        btn.setForeground(Color.WHITE);
-        btn.setContentAreaFilled(false);
-        btn.setBorderPainted(false);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return btn;
-    }
-
-    private JButton createIconButton(String text, Color color) {
-        JButton btn = new JButton(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setColor(color);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
-                super.paintComponent(g);
-            }
-        };
-        btn.setFont(new Font("Arial", Font.BOLD, 18));
-        btn.setForeground(Color.WHITE);
-        btn.setContentAreaFilled(false);
-        btn.setBorderPainted(false);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return btn;
+    private void handleAdminRespond(HelpRequest req) {
+        Logger.debug(CLASS_NAME, "Admin responding to request: " + req.getId());
+        if (helpRequestDAO.updateRequestStatus(req.getId(), "responded")) {
+            refreshAlerts();
+        }
     }
 }

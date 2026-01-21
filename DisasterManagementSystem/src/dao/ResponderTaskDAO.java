@@ -2,11 +2,14 @@ package dao;
 
 import models.ResponderTask;
 import database.DatabaseConnection;
+import util.Logger;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ResponderTaskDAO {
+    private static final String CLASS_NAME = "ResponderTaskDAO";
+
 
     public boolean assignTask(ResponderTask task) {
         String query = "INSERT INTO responder_tasks (responder_id, zone, task_description, status) " +
@@ -20,16 +23,23 @@ public class ResponderTaskDAO {
             pstmt.setString(3, task.getTaskDescription());
             pstmt.setString(4, task.getStatus());
 
-            return pstmt.executeUpdate() > 0;
+            int result = pstmt.executeUpdate();
+            if (result > 0) {
+                Logger.info(CLASS_NAME, "Task assigned: Responder=" + task.getResponderId() +
+                        ", Zone=" + task.getZone());
+                return true;
+            }
         } catch (SQLException e) {
-            System.out.println("Error assigning task: " + e.getMessage());
-            return false;
+            Logger.error(CLASS_NAME, "Failed to assign task", e);
         }
+        return false;
     }
+
 
     public List<ResponderTask> getTasksByZone(String zone) {
         List<ResponderTask> tasks = new ArrayList<>();
-        String query = "SELECT * FROM responder_tasks WHERE zone = ? AND status = 'active' ORDER BY assigned_at DESC";
+        String query = "SELECT * FROM responder_tasks WHERE zone = ? AND status = 'active' " +
+                "ORDER BY assigned_at DESC";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -38,23 +48,21 @@ public class ResponderTaskDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                ResponderTask task = new ResponderTask();
-                task.setId(rs.getInt("id"));
-                task.setResponderId(rs.getInt("responder_id"));
-                task.setZone(rs.getString("zone"));
-                task.setTaskDescription(rs.getString("task_description"));
-                task.setStatus(rs.getString("status"));
-                task.setAssignedAt(rs.getString("assigned_at"));
-                tasks.add(task);
+                tasks.add(extractTaskFromResultSet(rs));
             }
+
+            Logger.debug(CLASS_NAME, "Retrieved " + tasks.size() +
+                    " active tasks for zone: " + zone);
         } catch (SQLException e) {
-            System.out.println("Error fetching tasks by zone: " + e.getMessage());
+            Logger.error(CLASS_NAME, "Error fetching tasks for zone: " + zone, e);
         }
         return tasks;
     }
 
+
     public int getResponderCountByZone(String zone) {
-        String query = "SELECT COUNT(DISTINCT responder_id) as count FROM responder_tasks WHERE zone = ? AND status = 'active'";
+        String query = "SELECT COUNT(DISTINCT responder_id) as count FROM responder_tasks " +
+                "WHERE zone = ? AND status = 'active'";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -63,13 +71,16 @@ public class ResponderTaskDAO {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                return rs.getInt("count");
+                int count = rs.getInt("count");
+                Logger.debug(CLASS_NAME, "Zone: " + zone + ", Active Responders: " + count);
+                return count;
             }
         } catch (SQLException e) {
-            System.out.println("Error counting responders: " + e.getMessage());
+            Logger.error(CLASS_NAME, "Error counting responders for zone: " + zone, e);
         }
         return 0;
     }
+
 
     public List<String> getActiveZones() {
         List<String> zones = new ArrayList<>();
@@ -82,11 +93,14 @@ public class ResponderTaskDAO {
             while (rs.next()) {
                 zones.add(rs.getString("zone"));
             }
+
+            Logger.debug(CLASS_NAME, "Found " + zones.size() + " active zones");
         } catch (SQLException e) {
-            System.out.println("Error fetching zones: " + e.getMessage());
+            Logger.error(CLASS_NAME, "Error fetching active zones", e);
         }
         return zones;
     }
+
 
     public boolean updateTaskStatus(int taskId, String newStatus) {
         String query = "UPDATE responder_tasks SET status = ? WHERE id = ?";
@@ -97,10 +111,27 @@ public class ResponderTaskDAO {
             pstmt.setString(1, newStatus);
             pstmt.setInt(2, taskId);
 
-            return pstmt.executeUpdate() > 0;
+            int result = pstmt.executeUpdate();
+            if (result > 0) {
+                Logger.info(CLASS_NAME, "Task status updated: ID=" + taskId +
+                        ", Status=" + newStatus);
+                return true;
+            }
         } catch (SQLException e) {
-            System.out.println("Error updating task status: " + e.getMessage());
-            return false;
+            Logger.error(CLASS_NAME, "Failed to update task status", e);
         }
+        return false;
+    }
+
+
+    private ResponderTask extractTaskFromResultSet(ResultSet rs) throws SQLException {
+        ResponderTask task = new ResponderTask();
+        task.setId(rs.getInt("id"));
+        task.setResponderId(rs.getInt("responder_id"));
+        task.setZone(rs.getString("zone"));
+        task.setTaskDescription(rs.getString("task_description"));
+        task.setStatus(rs.getString("status"));
+        task.setAssignedAt(rs.getString("assigned_at"));
+        return task;
     }
 }

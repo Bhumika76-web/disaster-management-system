@@ -2,11 +2,15 @@ package dao;
 
 import models.Disaster;
 import database.DatabaseConnection;
+import util.Logger;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DisasterDAO {
+    private static final String CLASS_NAME = "DisasterDAO";
+
+
     public boolean addDisaster(Disaster disaster) {
         String query = "INSERT INTO disasters (type, location, severity, description, status) " +
                 "VALUES (?, ?, ?, ?, ?)";
@@ -20,12 +24,18 @@ public class DisasterDAO {
             pstmt.setString(4, disaster.getDescription());
             pstmt.setString(5, disaster.getStatus());
 
-            return pstmt.executeUpdate() > 0;
+            int result = pstmt.executeUpdate();
+            if (result > 0) {
+                Logger.info(CLASS_NAME, "Disaster added: " + disaster.getType() +
+                        " at " + disaster.getLocation());
+                return true;
+            }
         } catch (SQLException e) {
-            System.out.println("Error adding disaster: " + e.getMessage());
-            return false;
+            Logger.error(CLASS_NAME, "Failed to add disaster", e);
         }
+        return false;
     }
+
 
     public List<Disaster> getAllDisasters() {
         List<Disaster> disasters = new ArrayList<>();
@@ -36,21 +46,16 @@ public class DisasterDAO {
              ResultSet rs = stmt.executeQuery(query)) {
 
             while (rs.next()) {
-                Disaster disaster = new Disaster();
-                disaster.setId(rs.getInt("id"));
-                disaster.setType(rs.getString("type"));
-                disaster.setLocation(rs.getString("location"));
-                disaster.setSeverity(rs.getInt("severity"));
-                disaster.setDescription(rs.getString("description"));
-                disaster.setTimestamp(rs.getString("timestamp"));
-                disaster.setStatus(rs.getString("status"));
-                disasters.add(disaster);
+                disasters.add(extractDisasterFromResultSet(rs));
             }
+
+            Logger.debug(CLASS_NAME, "Retrieved " + disasters.size() + " disasters");
         } catch (SQLException e) {
-            System.out.println("Error fetching disasters: " + e.getMessage());
+            Logger.error(CLASS_NAME, "Error fetching all disasters", e);
         }
         return disasters;
     }
+
 
     public List<Disaster> getActiveDisasters() {
         List<Disaster> disasters = new ArrayList<>();
@@ -61,21 +66,16 @@ public class DisasterDAO {
              ResultSet rs = stmt.executeQuery(query)) {
 
             while (rs.next()) {
-                Disaster disaster = new Disaster();
-                disaster.setId(rs.getInt("id"));
-                disaster.setType(rs.getString("type"));
-                disaster.setLocation(rs.getString("location"));
-                disaster.setSeverity(rs.getInt("severity"));
-                disaster.setDescription(rs.getString("description"));
-                disaster.setTimestamp(rs.getString("timestamp"));
-                disaster.setStatus(rs.getString("status"));
-                disasters.add(disaster);
+                disasters.add(extractDisasterFromResultSet(rs));
             }
+
+            Logger.debug(CLASS_NAME, "Retrieved " + disasters.size() + " active disasters");
         } catch (SQLException e) {
-            System.out.println("Error fetching active disasters: " + e.getMessage());
+            Logger.error(CLASS_NAME, "Error fetching active disasters", e);
         }
         return disasters;
     }
+
 
     public boolean updateDisasterStatus(int id, String newStatus) {
         String query = "UPDATE disasters SET status = ? WHERE id = ?";
@@ -86,17 +86,22 @@ public class DisasterDAO {
             pstmt.setString(1, newStatus);
             pstmt.setInt(2, id);
 
-            return pstmt.executeUpdate() > 0;
+            int result = pstmt.executeUpdate();
+            if (result > 0) {
+                Logger.info(CLASS_NAME, "Disaster status updated: ID=" + id +
+                        ", Status=" + newStatus);
+                return true;
+            }
         } catch (SQLException e) {
-            System.out.println("Error updating disaster: " + e.getMessage());
-            return false;
+            Logger.error(CLASS_NAME, "Failed to update disaster status", e);
         }
+        return false;
     }
+
 
     public List<Disaster> searchByLocation(String location) {
         List<Disaster> disasters = new ArrayList<>();
-        String query = "SELECT * FROM disasters WHERE location LIKE ? " +
-                "ORDER BY severity DESC";
+        String query = "SELECT * FROM disasters WHERE location LIKE ? ORDER BY severity DESC";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -105,21 +110,17 @@ public class DisasterDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                Disaster d = new Disaster();
-                d.setId(rs.getInt("id"));
-                d.setType(rs.getString("type"));
-                d.setLocation(rs.getString("location"));
-                d.setSeverity(rs.getInt("severity"));
-                d.setDescription(rs.getString("description"));
-                d.setTimestamp(rs.getString("timestamp"));
-                d.setStatus(rs.getString("status"));
-                disasters.add(d);
+                disasters.add(extractDisasterFromResultSet(rs));
             }
+
+            Logger.debug(CLASS_NAME, "Search found " + disasters.size() +
+                    " disasters at location: " + location);
         } catch (SQLException e) {
-            System.out.println("Error searching disasters: " + e.getMessage());
+            Logger.error(CLASS_NAME, "Error searching disasters by location", e);
         }
         return disasters;
     }
+
 
     public List<Disaster> filterDisastersByTypeAndLocation(String type, String location) {
         List<Disaster> disasters = new ArrayList<>();
@@ -134,21 +135,14 @@ public class DisasterDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                Disaster d = new Disaster();
-                d.setId(rs.getInt("id"));
-                d.setType(rs.getString("type"));
-                d.setLocation(rs.getString("location"));
-                d.setSeverity(rs.getInt("severity"));
-                d.setDescription(rs.getString("description"));
-                d.setTimestamp(rs.getString("timestamp"));
-                d.setStatus(rs.getString("status"));
-                disasters.add(d);
+                disasters.add(extractDisasterFromResultSet(rs));
             }
         } catch (SQLException e) {
-            System.out.println("Error filtering disasters: " + e.getMessage());
+            Logger.error(CLASS_NAME, "Error filtering disasters", e);
         }
         return disasters;
     }
+
 
     public List<Disaster> getDisastersByLocation(String location) {
         List<Disaster> disasters = new ArrayList<>();
@@ -162,19 +156,24 @@ public class DisasterDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                Disaster d = new Disaster();
-                d.setId(rs.getInt("id"));
-                d.setType(rs.getString("type"));
-                d.setLocation(rs.getString("location"));
-                d.setSeverity(rs.getInt("severity"));
-                d.setDescription(rs.getString("description"));
-                d.setTimestamp(rs.getString("timestamp"));
-                d.setStatus(rs.getString("status"));
-                disasters.add(d);
+                disasters.add(extractDisasterFromResultSet(rs));
             }
         } catch (SQLException e) {
-            System.out.println("Error fetching disasters by location: " + e.getMessage());
+            Logger.error(CLASS_NAME, "Error fetching disasters by location", e);
         }
         return disasters;
+    }
+
+
+    private Disaster extractDisasterFromResultSet(ResultSet rs) throws SQLException {
+        Disaster disaster = new Disaster();
+        disaster.setId(rs.getInt("id"));
+        disaster.setType(rs.getString("type"));
+        disaster.setLocation(rs.getString("location"));
+        disaster.setSeverity(rs.getInt("severity"));
+        disaster.setDescription(rs.getString("description"));
+        disaster.setTimestamp(rs.getString("timestamp"));
+        disaster.setStatus(rs.getString("status"));
+        return disaster;
     }
 }

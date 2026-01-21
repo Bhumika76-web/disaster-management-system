@@ -1,0 +1,239 @@
+[2026-01-20 13:27:13] INFO - DatabaseConnection: All tables created successfully!
+[2026-01-20 13:27:13] INFO - LoginRegisterPanel: Initializing LoginRegisterPanel
+[2026-01-20 13:27:32] INFO - LoginRegisterPanel: Login attempt for: admin@test.com
+[2026-01-20 13:27:33] INFO - UserDAO: User logged in: admin@test.com
+[2026-01-20 13:27:33] INFO - LoginRegisterPanel: User logged in successfully: testadmin
+[2026-01-20 13:27:35] INFO - AdminDashboard: Initializing AdminDashboard for: testadmin
+[2026-01-20 13:27:35] DEBUG - AdminDashboard: Refreshing disaster list
+[2026-01-20 13:27:36] DEBUG - DisasterDAO: Retrieved 6 disasters
+[2026-01-20 13:27:36] INFO - AdminDashboard: Disaster list refreshed: 6 disasters
+[2026-01-20 13:27:41] DEBUG - AdminDashboard: Opening add disaster dialog
+[2026-01-20 13:27:45] INFO - AdminHelpRequestManagement: Initializing AdminHelpRequestManagement
+[2026-01-20 13:27:45] DEBUG - AdminHelpRequestManagement: Refreshing all help requests
+[2026-01-20 13:27:46] DEBUG - HelpRequestDAO: Retrieved 3 help requests
+[2026-01-20 13:27:46] INFO - AdminHelpRequestManagement: Requests refreshed - Pending: 2
+[2026-01-20 13:28:02] DEBUG - AdminHelpRequestManagement: Refreshing all help requests
+[2026-01-20 13:28:02] DEBUG - HelpRequestDAO: Retrieved 3 help requests
+[2026-01-20 13:28:02] INFO - AdminHelpRequestManagement: Requests refreshed - Pending: 2
+[2026-01-20 13:28:05] INFO - AdminDashboard: Initializing AdminDashboard for: testadmin
+[2026-01-20 13:28:05] DEBUG - AdminDashboard: Refreshing disaster list
+[2026-01-20 13:28:05] DEBUG - DisasterDAO: Retrieved 6 disasters
+[2026-01-20 13:28:05] INFO - AdminDashboard: Disaster list refreshed: 6 disasters
+[2026-01-20 13:28:07] DEBUG - AdminDashboard: Fetching all users
+[2026-01-20 13:28:07] DEBUG - UserDAO: Retrieved 7 users
+[2026-01-20 13:28:14] INFO - AdminHelpRequestManagement: Initializing AdminHelpRequestManagement
+[2026-01-20 13:28:14] DEBUG - AdminHelpRequestManagement: Refreshing all help requests
+[2026-01-20 13:28:14] DEBUG - HelpRequestDAO: Retrieved 3 help requests
+[2026-01-20 13:28:14] INFO - AdminHelpRequestManagement: Requests refreshed - Pending: 2
+[2026-01-20 13:28:17] INFO - AdminDashboard: Initializing AdminDashboard for: testadmin
+[2026-01-20 13:28:17] DEBUG - AdminDashboard: Refreshing disaster list
+[2026-01-20 13:28:17] DEBUG - DisasterDAO: Retrieved 6 disasters
+[2026-01-20 13:28:17] INFO - AdminDashboard: Disaster list refreshed: 6 disasters
+[2026-01-20 13:28:18] INFO - AlertsPage: Initializing AlertsPage for: testadmin
+[2026-01-20 13:28:18] DEBUG - AlertsPage: Refreshing alerts
+[2026-01-20 13:28:18] DEBUG - DisasterDAO: Retrieved 5 active disasters
+[2026-01-20 13:28:18] INFO - AlertsPage: Alerts refreshed
+[2026-01-20 13:28:25] INFO - AdminDashboard: Initializing AdminDashboard for: testadmin
+[2026-01-20 13:28:25] DEBUG - AdminDashboard: Refreshing disaster list
+[2026-01-20 13:28:25] DEBUG - DisasterDAO: Retrieved 6 disasters
+[2026-01-20 13:28:25] INFO - AdminDashboard: Disaster list refreshed: 6 disasters
+[2026-01-20 13:28:27] INFO - RescueOperationsPage: Initializing RescueOperationsPage
+[2026-01-20 13:28:27] DEBUG - UserDAO: Retrieved 2 responders
+[2026-01-20 13:28:27] DEBUG - RescueOperationsPage: Refreshing operations
+[2026-01-20 13:28:27] DEBUG - ResponderTaskDAO: Found 3 active zones
+[2026-01-20 13:28:27] DEBUG - ResponderTaskDAO: Retrieved 1 active tasks for zone: Rural Area
+[2026-01-20 13:28:27] DEBUG - ResponderTaskDAO: Retrieved 1 active tasks for zone: Flood Zone
+[2026-01-20 13:28:27] DEBUG - ResponderTaskDAO: Retrieved 1 active tasks for zone: Urban Area
+[2026-01-20 13:28:30] DEBUG - ResponderTaskDAO: Found 3 active zones
+[2026-01-20 13:28:30] DEBUG - ResponderTaskDAO: Zone: Rural Area, Active Responders: 1
+[2026-01-20 13:28:30] DEBUG - ResponderTaskDAO: Zone: Flood Zone, Active Responders: 1
+[2026-01-20 13:28:30] DEBUG - ResponderTaskDAO: Zone: Urban Area, Active Responders: 1
+[2026-01-20 13:28:41] INFO - AdminDashboard: Initializing AdminDashboard for: testadmin
+[2026-01-20 13:28:41] DEBUG - AdminDashboard: Refreshing disaster list
+[2026-01-20 13:28:41] DEBUG - DisasterDAO: Retrieved 6 disasters
+[2026-01-20 13:28:41] INFO - AdminDashboard: Disaster list refreshed: 6 disasters
+[2026-01-20 13:28:43] INFO - RiskAssessmentPage: Initializing RiskAssessmentPage
+[2026-01-20 13:28:43] INFO - DisasterReportDAO: Found 4 high-risk areas
+[2026-01-20 13:28:43] DEBUG - NotificationAcknowledgmentDAO: Total acknowledged notifications: 6
+[2026-01-20 13:28:43] DEBUG - NotificationAcknowledgmentDAO: Total ignored notifications: 3
+[2026-01-20 13:28:43] DEBUG - NotificationAcknowledgmentDAO: Acknowledgment percentage: 66.67%
+[2026-01-20 13:28:43] DEBUG - NotificationAcknowledgmentDAO: Total acknowledged notifications: 6
+[2026-01-20 13:28:43] DEBUG - NotificationAcknowledgmentDAO: Total ignored notifications: 3
+[2026-01-20 13:28:46] INFO - AdminDashboard: Initializing AdminDashboard for: testadmin
+[2026-01-20 13:28:46] DEBUG - AdminDashboard: Refreshing disaster list
+[2026-01-20 13:28:46] DEBUG - DisasterDAO: Retrieved 6 disasters
+[2026-01-20 13:28:46] INFO - AdminDashboard: Disaster list refreshed: 6 disasters
+[2026-01-20 13:28:50] DEBUG - AdminDashboard: Fetching all users
+[2026-01-20 13:28:50] DEBUG - UserDAO: Retrieved 7 users
+[2026-01-20 13:29:00] INFO - LoginRegisterPanel: Initializing LoginRegisterPanel
+[2026-01-20 13:29:25] INFO - LoginRegisterPanel: Login attempt for: responder2@gmail.com
+[2026-01-20 13:29:25] INFO - UserDAO: User logged in: responder2@gmail.com
+[2026-01-20 13:29:25] INFO - LoginRegisterPanel: User logged in successfully: res1
+[2026-01-20 13:29:26] INFO - ResponderDashboard: Initializing ResponderDashboard for: res1
+[2026-01-20 13:29:26] DEBUG - ResponderDashboard: Refreshing all help requests
+[2026-01-20 13:29:26] DEBUG - HelpRequestDAO: Retrieved 3 help requests
+[2026-01-20 13:29:26] INFO - ResponderDashboard: Requests refreshed - Pending: 2, InProgress: 0, Resolved: 1
+[2026-01-20 13:29:30] DEBUG - ResponderDashboard: Accepting request: 3
+[2026-01-20 13:29:30] INFO - HelpRequestDAO: Help request status updated: ID=3, Status=in_progress
+[2026-01-20 13:29:30] INFO - ResponderDashboard: Request accepted - ID: 3
+[2026-01-20 13:29:32] DEBUG - ResponderDashboard: Refreshing all help requests
+[2026-01-20 13:29:32] DEBUG - HelpRequestDAO: Retrieved 3 help requests
+[2026-01-20 13:29:32] INFO - ResponderDashboard: Requests refreshed - Pending: 1, InProgress: 1, Resolved: 1
+[2026-01-20 13:29:34] DEBUG - ResponderDashboard: Accepting request: 1
+[2026-01-20 13:29:34] INFO - HelpRequestDAO: Help request status updated: ID=1, Status=in_progress
+[2026-01-20 13:29:34] INFO - ResponderDashboard: Request accepted - ID: 1
+[2026-01-20 13:29:36] DEBUG - ResponderDashboard: Refreshing all help requests
+[2026-01-20 13:29:36] DEBUG - HelpRequestDAO: Retrieved 3 help requests
+[2026-01-20 13:29:36] INFO - ResponderDashboard: Requests refreshed - Pending: 0, InProgress: 2, Resolved: 1
+[2026-01-20 13:29:49] INFO - RescueOperationsPage: Initializing RescueOperationsPage
+[2026-01-20 13:29:49] DEBUG - RescueOperationsPage: Refreshing operations
+[2026-01-20 13:29:49] DEBUG - ResponderTaskDAO: Found 3 active zones
+[2026-01-20 13:29:49] DEBUG - ResponderTaskDAO: Retrieved 1 active tasks for zone: Rural Area
+[2026-01-20 13:29:49] DEBUG - ResponderTaskDAO: Retrieved 1 active tasks for zone: Flood Zone
+[2026-01-20 13:29:49] DEBUG - ResponderTaskDAO: Retrieved 1 active tasks for zone: Urban Area
+[2026-01-20 13:29:49] DEBUG - ResponderTaskDAO: Found 3 active zones
+[2026-01-20 13:29:49] DEBUG - ResponderTaskDAO: Zone: Rural Area, Active Responders: 1
+[2026-01-20 13:29:49] DEBUG - ResponderTaskDAO: Zone: Flood Zone, Active Responders: 1
+[2026-01-20 13:29:49] DEBUG - ResponderTaskDAO: Zone: Urban Area, Active Responders: 1
+[2026-01-20 13:29:52] INFO - ResponderDashboard: Initializing ResponderDashboard for: res1
+[2026-01-20 13:29:52] DEBUG - ResponderDashboard: Refreshing all help requests
+[2026-01-20 13:29:52] DEBUG - HelpRequestDAO: Retrieved 3 help requests
+[2026-01-20 13:29:52] INFO - ResponderDashboard: Requests refreshed - Pending: 0, InProgress: 2, Resolved: 1
+[2026-01-20 13:29:55] INFO - LoginRegisterPanel: Initializing LoginRegisterPanel
+[2026-01-20 13:30:10] INFO - LoginRegisterPanel: Login attempt for: user@test.com
+[2026-01-20 13:30:10] INFO - UserDAO: User logged in: user@test.com
+[2026-01-20 13:30:10] INFO - LoginRegisterPanel: User logged in successfully: testuser
+[2026-01-20 13:30:12] INFO - CitizenDashboard: Initializing CitizenDashboard for: testuser
+[2026-01-20 13:30:12] DEBUG - DisasterDAO: Retrieved 5 active disasters
+[2026-01-20 13:30:12] DEBUG - CitizenDashboard: Refreshing alerts for user: testuser
+[2026-01-20 13:30:12] DEBUG - DisasterDAO: Retrieved 5 active disasters
+[2026-01-20 13:30:12] INFO - CitizenDashboard: Alerts refreshed - Total: 5
+[2026-01-20 13:30:18] INFO - AlertsPage: Initializing AlertsPage for: testuser
+[2026-01-20 13:30:18] DEBUG - AlertsPage: Refreshing alerts
+[2026-01-20 13:30:18] DEBUG - DisasterDAO: Retrieved 5 active disasters
+[2026-01-20 13:30:18] DEBUG - HelpRequestDAO: Retrieved 2 help requests for user ID: 2
+[2026-01-20 13:30:18] INFO - AlertsPage: Alerts refreshed
+[2026-01-20 13:30:25] INFO - CitizenDashboard: Initializing CitizenDashboard for: testuser
+[2026-01-20 13:30:25] DEBUG - DisasterDAO: Retrieved 5 active disasters
+[2026-01-20 13:30:25] DEBUG - CitizenDashboard: Refreshing alerts for user: testuser
+[2026-01-20 13:30:25] DEBUG - DisasterDAO: Retrieved 5 active disasters
+[2026-01-20 13:30:25] INFO - CitizenDashboard: Alerts refreshed - Total: 5
+[2026-01-20 13:30:27] INFO - RiskAssessmentPage: Initializing RiskAssessmentPage
+[2026-01-20 13:30:27] DEBUG - NotificationAcknowledgmentDAO: Total acknowledged notifications: 6
+[2026-01-20 13:30:27] DEBUG - NotificationAcknowledgmentDAO: Total ignored notifications: 3
+[2026-01-20 13:30:27] DEBUG - NotificationAcknowledgmentDAO: Acknowledgment percentage: 66.67%
+[2026-01-20 13:30:27] DEBUG - RiskAssessmentPage: Loading notifications for user: 2
+[2026-01-20 13:30:27] DEBUG - DisasterReportDAO: Retrieved 4 disaster reports
+[2026-01-20 13:30:27] DEBUG - NotificationAcknowledgmentDAO: Total acknowledged notifications: 6
+[2026-01-20 13:30:27] DEBUG - NotificationAcknowledgmentDAO: Total ignored notifications: 3
+[2026-01-20 13:30:30] DEBUG - RiskAssessmentPage: User ignored report: 4
+[2026-01-20 13:30:30] INFO - NotificationAcknowledgmentDAO: Notification recorded: User=testuser, Status=ignored
+[2026-01-20 13:30:32] DEBUG - RiskAssessmentPage: Loading notifications for user: 2
+[2026-01-20 13:30:32] DEBUG - DisasterReportDAO: Retrieved 4 disaster reports
+[2026-01-20 13:30:34] DEBUG - RiskAssessmentPage: User acknowledged report: 4
+[2026-01-20 13:30:34] INFO - NotificationAcknowledgmentDAO: Notification recorded: User=testuser, Status=acknowledged
+[2026-01-20 13:30:35] DEBUG - RiskAssessmentPage: Loading notifications for user: 2
+[2026-01-20 13:30:35] DEBUG - DisasterReportDAO: Retrieved 4 disaster reports
+[2026-01-20 13:30:42] DEBUG - RiskAssessmentPage: User acknowledged report: 3
+[2026-01-20 13:30:42] INFO - NotificationAcknowledgmentDAO: Notification recorded: User=testuser, Status=acknowledged
+[2026-01-20 13:30:43] DEBUG - RiskAssessmentPage: Loading notifications for user: 2
+[2026-01-20 13:30:43] DEBUG - DisasterReportDAO: Retrieved 4 disaster reports
+[2026-01-20 13:30:50] DEBUG - RiskAssessmentPage: User acknowledged report: 2
+[2026-01-20 13:30:50] INFO - NotificationAcknowledgmentDAO: Notification recorded: User=testuser, Status=acknowledged
+[2026-01-20 13:30:52] DEBUG - RiskAssessmentPage: Loading notifications for user: 2
+[2026-01-20 13:30:52] DEBUG - DisasterReportDAO: Retrieved 4 disaster reports
+[2026-01-20 13:30:57] DEBUG - RiskAssessmentPage: User ignored report: 1
+[2026-01-20 13:30:57] INFO - NotificationAcknowledgmentDAO: Notification recorded: User=testuser, Status=ignored
+[2026-01-20 13:30:58] DEBUG - RiskAssessmentPage: Loading notifications for user: 2
+[2026-01-20 13:30:58] DEBUG - DisasterReportDAO: Retrieved 4 disaster reports
+[2026-01-20 13:31:00] INFO - CitizenDashboard: Initializing CitizenDashboard for: testuser
+[2026-01-20 13:31:00] DEBUG - DisasterDAO: Retrieved 5 active disasters
+[2026-01-20 13:31:00] DEBUG - CitizenDashboard: Refreshing alerts for user: testuser
+[2026-01-20 13:31:00] DEBUG - DisasterDAO: Retrieved 5 active disasters
+[2026-01-20 13:31:00] INFO - CitizenDashboard: Alerts refreshed - Total: 5
+[2026-01-20 13:31:02] DEBUG - CitizenDashboard: Opening disaster report dialog
+[2026-01-20 13:31:06] INFO - RiskAssessmentPage: Initializing RiskAssessmentPage
+[2026-01-20 13:31:06] DEBUG - NotificationAcknowledgmentDAO: Total acknowledged notifications: 9
+[2026-01-20 13:31:06] DEBUG - NotificationAcknowledgmentDAO: Total ignored notifications: 5
+[2026-01-20 13:31:06] DEBUG - NotificationAcknowledgmentDAO: Acknowledgment percentage: 64.29%
+[2026-01-20 13:31:06] DEBUG - RiskAssessmentPage: Loading notifications for user: 2
+[2026-01-20 13:31:06] DEBUG - DisasterReportDAO: Retrieved 4 disaster reports
+[2026-01-20 13:31:06] DEBUG - NotificationAcknowledgmentDAO: Total acknowledged notifications: 9
+[2026-01-20 13:31:06] DEBUG - NotificationAcknowledgmentDAO: Total ignored notifications: 5
+[2026-01-20 13:31:08] INFO - CitizenDashboard: Initializing CitizenDashboard for: testuser
+[2026-01-20 13:31:08] DEBUG - DisasterDAO: Retrieved 5 active disasters
+[2026-01-20 13:31:08] DEBUG - CitizenDashboard: Refreshing alerts for user: testuser
+[2026-01-20 13:31:08] DEBUG - DisasterDAO: Retrieved 5 active disasters
+[2026-01-20 13:31:08] INFO - CitizenDashboard: Alerts refreshed - Total: 5
+[2026-01-20 13:31:10] INFO - LoginRegisterPanel: Initializing LoginRegisterPanel
+[2026-01-21 23:53:43] INFO - DatabaseConnection: All tables created successfully!
+[2026-01-21 23:53:43] INFO - LoginRegisterPanel: Initializing LoginRegisterPanel
+[2026-01-21 23:53:56] INFO - LoginRegisterPanel: Login attempt for: responder2@gmail.com
+[2026-01-21 23:53:56] WARN - UserDAO: Login failed for email: responder2@gmail.com
+[2026-01-21 23:53:56] WARN - LoginRegisterPanel: Login failed - Invalid credentials: responder2@gmail.com
+[2026-01-21 23:54:02] INFO - LoginRegisterPanel: Login attempt for: responder2@gmail.com
+[2026-01-21 23:54:02] INFO - UserDAO: User logged in: responder2@gmail.com
+[2026-01-21 23:54:02] INFO - LoginRegisterPanel: User logged in successfully: res1
+[2026-01-21 23:54:03] INFO - ResponderDashboard: Initializing ResponderDashboard for: res1
+[2026-01-21 23:54:03] DEBUG - ResponderDashboard: Refreshing all help requests
+[2026-01-21 23:54:03] DEBUG - HelpRequestDAO: Retrieved 3 help requests
+[2026-01-21 23:54:03] INFO - ResponderDashboard: Requests refreshed - Pending: 0, InProgress: 2, Resolved: 1
+[2026-01-21 23:54:07] INFO - RescueOperationsPage: Initializing RescueOperationsPage
+[2026-01-21 23:54:07] DEBUG - RescueOperationsPage: Refreshing operations
+[2026-01-21 23:54:07] DEBUG - ResponderTaskDAO: Found 3 active zones
+[2026-01-21 23:54:07] DEBUG - ResponderTaskDAO: Retrieved 1 active tasks for zone: Rural Area
+[2026-01-21 23:54:07] DEBUG - ResponderTaskDAO: Retrieved 1 active tasks for zone: Flood Zone
+[2026-01-21 23:54:07] DEBUG - ResponderTaskDAO: Retrieved 1 active tasks for zone: Urban Area
+[2026-01-21 23:54:07] INFO - RescueOperationsPage: Operations refreshed - Total tasks: 3
+[2026-01-21 23:54:07] DEBUG - ResponderTaskDAO: Found 3 active zones
+[2026-01-21 23:54:07] DEBUG - ResponderTaskDAO: Zone: Rural Area, Active Responders: 1
+[2026-01-21 23:54:07] DEBUG - ResponderTaskDAO: Zone: Flood Zone, Active Responders: 1
+[2026-01-21 23:54:07] DEBUG - ResponderTaskDAO: Zone: Urban Area, Active Responders: 1
+[2026-01-21 23:54:15] INFO - ResponderDashboard: Initializing ResponderDashboard for: res1
+[2026-01-21 23:54:15] DEBUG - ResponderDashboard: Refreshing all help requests
+[2026-01-21 23:54:15] DEBUG - HelpRequestDAO: Retrieved 3 help requests
+[2026-01-21 23:54:15] INFO - ResponderDashboard: Requests refreshed - Pending: 0, InProgress: 2, Resolved: 1
+[2026-01-21 23:54:18] INFO - LoginRegisterPanel: Initializing LoginRegisterPanel
+[2026-01-21 23:54:32] INFO - LoginRegisterPanel: Login attempt for: admin@test.com
+[2026-01-21 23:54:32] INFO - UserDAO: User logged in: admin@test.com
+[2026-01-21 23:54:32] INFO - LoginRegisterPanel: User logged in successfully: testadmin
+[2026-01-21 23:54:34] INFO - AdminDashboard: Initializing AdminDashboard for: testadmin
+[2026-01-21 23:54:34] DEBUG - AdminDashboard: Refreshing disaster list
+[2026-01-21 23:54:34] DEBUG - DisasterDAO: Retrieved 6 disasters
+[2026-01-21 23:54:34] INFO - AdminDashboard: Disaster list refreshed: 6 disasters
+[2026-01-21 23:54:35] INFO - RiskAssessmentPage: Initializing RiskAssessmentPage
+[2026-01-21 23:54:35] INFO - DisasterReportDAO: Found 4 high-risk areas
+[2026-01-21 23:54:35] DEBUG - NotificationAcknowledgmentDAO: Total acknowledged notifications: 9
+[2026-01-21 23:54:35] DEBUG - NotificationAcknowledgmentDAO: Total ignored notifications: 5
+[2026-01-21 23:54:35] DEBUG - NotificationAcknowledgmentDAO: Acknowledgment percentage: 64.29%
+[2026-01-21 23:54:35] DEBUG - NotificationAcknowledgmentDAO: Total acknowledged notifications: 9
+[2026-01-21 23:54:35] DEBUG - NotificationAcknowledgmentDAO: Total ignored notifications: 5
+[2026-01-21 23:54:38] INFO - AdminDashboard: Initializing AdminDashboard for: testadmin
+[2026-01-21 23:54:38] DEBUG - AdminDashboard: Refreshing disaster list
+[2026-01-21 23:54:38] DEBUG - DisasterDAO: Retrieved 6 disasters
+[2026-01-21 23:54:38] INFO - AdminDashboard: Disaster list refreshed: 6 disasters
+[2026-01-21 23:54:39] INFO - RescueOperationsPage: Initializing RescueOperationsPage
+[2026-01-21 23:54:39] DEBUG - UserDAO: Retrieved 2 responders
+[2026-01-21 23:54:39] DEBUG - RescueOperationsPage: Refreshing operations
+[2026-01-21 23:54:39] DEBUG - ResponderTaskDAO: Found 3 active zones
+[2026-01-21 23:54:39] DEBUG - ResponderTaskDAO: Retrieved 1 active tasks for zone: Rural Area
+[2026-01-21 23:54:39] DEBUG - ResponderTaskDAO: Retrieved 1 active tasks for zone: Flood Zone
+[2026-01-21 23:54:39] DEBUG - ResponderTaskDAO: Retrieved 1 active tasks for zone: Urban Area
+[2026-01-21 23:54:39] INFO - RescueOperationsPage: Operations refreshed - Total tasks: 3
+[2026-01-21 23:54:41] DEBUG - ResponderTaskDAO: Found 3 active zones
+[2026-01-21 23:54:41] DEBUG - ResponderTaskDAO: Zone: Rural Area, Active Responders: 1
+[2026-01-21 23:54:41] DEBUG - ResponderTaskDAO: Zone: Flood Zone, Active Responders: 1
+[2026-01-21 23:54:41] DEBUG - ResponderTaskDAO: Zone: Urban Area, Active Responders: 1
+[2026-01-21 23:54:45] INFO - AdminDashboard: Initializing AdminDashboard for: testadmin
+[2026-01-21 23:54:45] DEBUG - AdminDashboard: Refreshing disaster list
+[2026-01-21 23:54:45] DEBUG - DisasterDAO: Retrieved 6 disasters
+[2026-01-21 23:54:45] INFO - AdminDashboard: Disaster list refreshed: 6 disasters
+[2026-01-21 23:54:47] INFO - AdminHelpRequestManagement: Initializing AdminHelpRequestManagement
+[2026-01-21 23:54:47] DEBUG - AdminHelpRequestManagement: Refreshing all help requests
+[2026-01-21 23:54:47] DEBUG - HelpRequestDAO: Retrieved 3 help requests
+[2026-01-21 23:54:47] INFO - AdminHelpRequestManagement: Requests refreshed - Pending: 0
+[2026-01-21 23:54:53] INFO - AdminDashboard: Initializing AdminDashboard for: testadmin
+[2026-01-21 23:54:53] DEBUG - AdminDashboard: Refreshing disaster list
+[2026-01-21 23:54:53] DEBUG - DisasterDAO: Retrieved 6 disasters
+[2026-01-21 23:54:53] INFO - AdminDashboard: Disaster list refreshed: 6 disasters
+[2026-01-21 23:54:54] INFO - LoginRegisterPanel: Initializing LoginRegisterPanel

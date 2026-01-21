@@ -2,11 +2,14 @@ package dao;
 
 import models.HelpRequest;
 import database.DatabaseConnection;
+import util.Logger;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HelpRequestDAO {
+    private static final String CLASS_NAME = "HelpRequestDAO";
+
 
     public boolean submitHelpRequest(HelpRequest request) {
         String query = "INSERT INTO help_requests (user_id, username, description, location, " +
@@ -24,12 +27,17 @@ public class HelpRequestDAO {
             pstmt.setString(6, request.getContactNumber());
             pstmt.setString(7, request.getStatus());
 
-            return pstmt.executeUpdate() > 0;
+            int result = pstmt.executeUpdate();
+            if (result > 0) {
+                Logger.info(CLASS_NAME, "Help request submitted by: " + request.getUsername());
+                return true;
+            }
         } catch (SQLException e) {
-            System.out.println("Error submitting help request: " + e.getMessage());
-            return false;
+            Logger.error(CLASS_NAME, "Failed to submit help request", e);
         }
+        return false;
     }
+
 
     public List<HelpRequest> getAllHelpRequests() {
         List<HelpRequest> requests = new ArrayList<>();
@@ -40,23 +48,34 @@ public class HelpRequestDAO {
              ResultSet rs = stmt.executeQuery(query)) {
 
             while (rs.next()) {
-                HelpRequest request = new HelpRequest();
-                request.setId(rs.getInt("id"));
-                request.setUserId(rs.getInt("user_id"));
-                request.setUsername(rs.getString("username"));
-                request.setDescription(rs.getString("description"));
-                request.setLocation(rs.getString("location"));
-                request.setRequestType(rs.getString("request_type"));
-                request.setContactNumber(rs.getString("contact_number"));
-                request.setStatus(rs.getString("status"));
-                request.setTimestamp(rs.getString("timestamp"));
-                requests.add(request);
+                requests.add(extractRequestFromResultSet(rs));
             }
+
+            Logger.debug(CLASS_NAME, "Retrieved " + requests.size() + " help requests");
         } catch (SQLException e) {
-            System.out.println("Error fetching all help requests: " + e.getMessage());
+            Logger.error(CLASS_NAME, "Error fetching all help requests", e);
         }
         return requests;
     }
+
+
+    public List<HelpRequest> getPendingHelpRequests() {
+        List<HelpRequest> requests = new ArrayList<>();
+        String query = "SELECT * FROM help_requests WHERE status = 'pending' ORDER BY timestamp DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            while (rs.next()) {
+                requests.add(extractRequestFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            Logger.error(CLASS_NAME, "Error fetching pending requests", e);
+        }
+        return requests;
+    }
+
 
     public List<HelpRequest> getUserHelpRequests(int userId) {
         List<HelpRequest> requests = new ArrayList<>();
@@ -69,50 +88,17 @@ public class HelpRequestDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                HelpRequest request = new HelpRequest();
-                request.setId(rs.getInt("id"));
-                request.setUserId(rs.getInt("user_id"));
-                request.setUsername(rs.getString("username"));
-                request.setDescription(rs.getString("description"));
-                request.setLocation(rs.getString("location"));
-                request.setRequestType(rs.getString("request_type"));
-                request.setContactNumber(rs.getString("contact_number"));
-                request.setStatus(rs.getString("status"));
-                request.setTimestamp(rs.getString("timestamp"));
-                requests.add(request);
+                requests.add(extractRequestFromResultSet(rs));
             }
+
+            Logger.debug(CLASS_NAME, "Retrieved " + requests.size() +
+                    " help requests for user ID: " + userId);
         } catch (SQLException e) {
-            System.out.println("Error fetching user help requests: " + e.getMessage());
+            Logger.error(CLASS_NAME, "Error fetching user help requests for user: " + userId, e);
         }
         return requests;
     }
 
-    public List<HelpRequest> getPendingHelpRequests() {
-        List<HelpRequest> requests = new ArrayList<>();
-        String query = "SELECT * FROM help_requests WHERE status = 'pending' ORDER BY timestamp DESC";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-
-            while (rs.next()) {
-                HelpRequest request = new HelpRequest();
-                request.setId(rs.getInt("id"));
-                request.setUserId(rs.getInt("user_id"));
-                request.setUsername(rs.getString("username"));
-                request.setDescription(rs.getString("description"));
-                request.setLocation(rs.getString("location"));
-                request.setRequestType(rs.getString("request_type"));
-                request.setContactNumber(rs.getString("contact_number"));
-                request.setStatus(rs.getString("status"));
-                request.setTimestamp(rs.getString("timestamp"));
-                requests.add(request);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error fetching pending requests: " + e.getMessage());
-        }
-        return requests;
-    }
 
     public boolean updateRequestStatus(int requestId, String newStatus) {
         String query = "UPDATE help_requests SET status = ? WHERE id = ?";
@@ -123,10 +109,30 @@ public class HelpRequestDAO {
             pstmt.setString(1, newStatus);
             pstmt.setInt(2, requestId);
 
-            return pstmt.executeUpdate() > 0;
+            int result = pstmt.executeUpdate();
+            if (result > 0) {
+                Logger.info(CLASS_NAME, "Help request status updated: ID=" + requestId +
+                        ", Status=" + newStatus);
+                return true;
+            }
         } catch (SQLException e) {
-            System.out.println("Error updating request status: " + e.getMessage());
-            return false;
+            Logger.error(CLASS_NAME, "Failed to update help request status", e);
         }
+        return false;
+    }
+
+
+    private HelpRequest extractRequestFromResultSet(ResultSet rs) throws SQLException {
+        HelpRequest request = new HelpRequest();
+        request.setId(rs.getInt("id"));
+        request.setUserId(rs.getInt("user_id"));
+        request.setUsername(rs.getString("username"));
+        request.setDescription(rs.getString("description"));
+        request.setLocation(rs.getString("location"));
+        request.setRequestType(rs.getString("request_type"));
+        request.setContactNumber(rs.getString("contact_number"));
+        request.setStatus(rs.getString("status"));
+        request.setTimestamp(rs.getString("timestamp"));
+        return request;
     }
 }
